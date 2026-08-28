@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+/*
+ * Component-level textures (leather, paper, metal) live in their own
+ * CSS Modules next to each component - see src/components/**\/*.module.css.
+ * This file only holds the true global reset.
+ */
+
+body {
+  margin: 0;
+  background: var(--backdrop);
+  font-family: var(--font-ui);
+}

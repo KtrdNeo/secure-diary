@@ -1,0 +1,191 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.editorContent {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* ---- base prose ---------------------------------------------------- */
+
+.prose {
+  height: 100%;
+  padding: clamp(16px, 3vw, 28px);
+  font-family: var(--font-page);
+  font-size: 1.02rem;
+  line-height: 1.7;
+  color: var(--ink-primary);
+  outline: none;
+}
+
+.prose p {
+  margin: 0 0 0.9em;
+}
+
+.prose h1,
+.prose h2,
+.prose h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  margin: 0.6em 0 0.4em;
+  line-height: 1.25;
+}
+
+.prose h1 {
+  font-size: 1.6rem;
+}
+.prose h2 {
+  font-size: 1.3rem;
+}
+.prose h3 {
+  font-size: 1.1rem;
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.4em;
+  margin: 0 0 0.9em;
+}
+
+.prose blockquote {
+  margin: 0 0 0.9em;
+  padding-left: 0.9em;
+  border-left: 3px solid var(--metal-base);
+  color: var(--ink-secondary);
+  font-style: italic;
+}
+
+.prose a {
+  color: var(--metal-dark);
+  text-decoration: underline;
+}
+
+.prose p.is-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--ink-secondary);
+  opacity: 0.6;
+  pointer-events: none;
+  height: 0;
+}
+
+/* ---- task list / checkboxes (native Tiptap NodeView markup) -------- */
+
+.prose ul[data-type='taskList'] {
+  list-style: none;
+  padding-left: 0;
+}
+
+.prose li[data-type='taskItem'] {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0.25em 0;
+}
+
+.prose li[data-type='taskItem'] > label {
+  margin-top: 0.3em;
+}
+
+.prose li[data-type='taskItem'] input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--metal-dark);
+  cursor: pointer;
+}
+
+.prose li[data-type='taskItem'][data-checked='true'] > div {
+  color: var(--ink-secondary);
+  text-decoration: line-through;
+}
+
+/* ---- radio (choice) list -------------------------------------------- */
+
+.prose ul[data-radio-group] {
+  list-style: none;
+  padding-left: 0;
+}
+
+.prose li[data-radio-item] {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0.25em 0;
+}
+
+.prose li[data-radio-item] button[data-radio-control] {
+  margin-top: 0.35em;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink-secondary);
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.prose li[data-radio-item][data-checked='true'] button[data-radio-control] {
+  border-color: var(--metal-dark);
+  background: radial-gradient(circle, var(--metal-dark) 40%, transparent 44%);
+}
+
+.prose li[data-radio-item] button[data-radio-control]:focus-visible {
+  outline: 2px solid var(--metal-base);
+  outline-offset: 2px;
+}
+
+.prose div[data-radio-content] p {
+  margin: 0;
+}
+
+/* ---- callouts --------------------------------------------------------- */
+
+.prose div[data-callout] {
+  margin: 0.9em 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-left: 4px solid var(--metal-base);
+  background: color-mix(in srgb, var(--metal-base) 14%, transparent);
+}
+
+.prose div[data-callout][data-variant='warning'] {
+  border-left-color: #b3261e;
+  background: color-mix(in srgb, #b3261e 12%, transparent);
+}
+
+.prose div[data-callout][data-variant='tip'] {
+  border-left-color: #2e7d32;
+  background: color-mix(in srgb, #2e7d32 12%, transparent);
+}
+
+.prose div[data-callout] p:last-child {
+  margin-bottom: 0;
+}
+
+/* ---- tables ------------------------------------------------------------ */
+
+.prose table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.9em 0;
+  font-size: 0.92em;
+}
+
+.prose th,
+.prose td {
+  border: 1px solid color-mix(in srgb, var(--ink-secondary) 35%, transparent);
+  padding: 6px 10px;
+  text-align: left;
+}
+
+.prose th {
+  background: color-mix(in srgb, var(--ink-secondary) 12%, transparent);
+  font-family: var(--font-ui);
+  font-weight: 600;
+}

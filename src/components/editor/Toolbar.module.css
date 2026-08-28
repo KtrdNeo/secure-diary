@@ -1,0 +1,92 @@
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  padding: 6px 8px;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink-secondary) 20%, transparent);
+  font-family: var(--font-ui);
+}
+
+.group {
+  display: flex;
+  gap: 2px;
+  padding: 0 6px;
+  border-right: 1px solid color-mix(in srgb, var(--ink-secondary) 15%, transparent);
+}
+
+.group:last-of-type {
+  border-right: none;
+}
+
+.button {
+  min-width: 28px;
+  height: 28px;
+  padding: 0 6px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--ink-primary);
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--ink-secondary) 15%, transparent);
+}
+
+.button[aria-pressed='true'] {
+  background: var(--metal-base);
+  color: #1a1408;
+}
+
+.button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--metal-base);
+  outline-offset: 1px;
+}
+
+.progressWrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  padding: 0 6px;
+}
+
+.progressTrack {
+  width: 72px;
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink-secondary) 20%, transparent);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--metal-base);
+  transition: width 0.25s ease;
+}
+
+.progressLabel {
+  font-size: 0.7rem;
+  color: var(--ink-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+  .group {
+    padding: 0 3px;
+  }
+  .button {
+    min-width: 24px;
+    height: 24px;
+  }
+}

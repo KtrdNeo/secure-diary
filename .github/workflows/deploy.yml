@@ -1,0 +1,35 @@
+name: Deploy to Vercel
+
+# OPTIONAL - only needed if you want GitHub Actions to trigger the
+# deploy itself. If you instead connect this repo directly in Vercel's
+# dashboard (Import Project), Vercel auto-builds and deploys on every
+# push on its own, using vercel.json, with zero YAML and zero secrets.
+# Don't run both - pick one. This file stays inert (see the `if:` guard
+# below) until you both add the three secrets AND set the
+# ENABLE_VERCEL_DEPLOY repo variable to "true":
+#   VERCEL_TOKEN      - vercel.com/account/tokens
+#   VERCEL_ORG_ID     - from `vercel link` (creates .vercel/project.json)
+#   VERCEL_PROJECT_ID - same file
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ vars.ENABLE_VERCEL_DEPLOY == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+      - run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - run: npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - run: npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}

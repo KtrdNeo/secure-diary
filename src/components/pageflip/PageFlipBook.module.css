@@ -1,0 +1,40 @@
+.perspective {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  perspective: 1800px;
+}
+
+.staticLayer {
+  height: 100%;
+}
+
+.flipLayer {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  transform-origin: left center;
+  transition: transform 0.68s var(--ease-page-turn);
+  will-change: transform;
+  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.35);
+}
+
+.pageIndicator {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  letter-spacing: 0.03em;
+  color: var(--ink-secondary);
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flipLayer {
+    transition-duration: 0.01s;
+  }
+}

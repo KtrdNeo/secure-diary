@@ -1,0 +1,74 @@
+/**
+ * Theme design tokens.
+ *
+ * Three skeuomorphic themes, switched by setting data-theme on the root
+ * element. Each block below is a complete, self-contained palette - see
+ * CHECKPOINT_SUMMARY.md for the reasoning behind each theme's specific
+ * hues (each was deliberately checked against generic "AI look" defaults:
+ * warm-cream-and-terracotta, near-black-and-neon-accent, broadsheet-gray).
+ *
+ * Token naming: --cover-* (leather), --paper-* (page), --metal-* (rings/
+ * accents/brass), --ink-* (text). Shared, theme-independent tokens
+ * (radius, easing, type scale) live in :root once, at the bottom.
+ */
+
+:root[data-theme='light-leather'] {
+  --cover-base: #6b4226;
+  --cover-highlight: #8b5a2b;
+  --cover-shadow: #3f2414;
+  --paper-base: #efe2c0;
+  --paper-shadow: #d8c69e;
+  --metal-light: #e2c690;
+  --metal-base: #b8935a;
+  --metal-dark: #7d5c30;
+  --ink-primary: #3b2a1a;
+  --ink-secondary: #6b5842;
+  --backdrop: #d9cdb8;
+}
+
+:root[data-theme='dark-obsidian'] {
+  --cover-base: #16141a;
+  --cover-highlight: #2a2733;
+  --cover-shadow: #060508;
+  --paper-base: #24242b;
+  --paper-shadow: #17171c;
+  --metal-light: #c3cad8;
+  --metal-base: #8b95a8;
+  --metal-dark: #4d5566;
+  --ink-primary: #e8e6ed;
+  --ink-secondary: #9c98a8;
+  --backdrop: #0c0b10;
+}
+
+:root[data-theme='sepia-vintage'] {
+  --cover-base: #5c2a27;
+  --cover-highlight: #7a3f35;
+  --cover-shadow: #33130f;
+  --paper-base: #e8d9b5;
+  --paper-shadow: #cdb98c;
+  --metal-light: #cbab6c;
+  --metal-base: #9c7c3e;
+  --metal-dark: #6b5226;
+  --ink-primary: #4a3323;
+  --ink-secondary: #7a6248;
+  --backdrop: #cbb890;
+}
+
+:root {
+  /* Type scale - three roles, three jobs (see CHECKPOINT_SUMMARY.md):
+     display = headings, page = diary content, ui = interface chrome. */
+  --font-display: 'Fraunces Variable', Georgia, serif;
+  --font-page: 'Source Serif 4', Georgia, serif;
+  --font-ui: 'Work Sans Variable', system-ui, sans-serif;
+
+  --radius-cover: 18px;
+  --radius-paper: 3px;
+
+  --ease-page-turn: cubic-bezier(0.45, 0.05, 0.15, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --ease-page-turn: linear;
+  }
+}

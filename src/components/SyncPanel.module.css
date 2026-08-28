@@ -1,0 +1,135 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+}
+
+.panel {
+  width: min(400px, 100%);
+  background: var(--paper-base);
+  color: var(--ink-primary);
+  border-radius: 12px;
+  padding: clamp(22px, 5vw, 32px);
+  box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.6);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.close {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: color-mix(in srgb, var(--ink-primary) 10%, transparent);
+  color: var(--ink-primary);
+  font-size: 1.15rem;
+  cursor: pointer;
+}
+
+.close:focus-visible {
+  outline: 2px solid var(--metal-base);
+  outline-offset: 2px;
+}
+
+.hint {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--ink-secondary);
+  margin: 0 0 12px;
+}
+
+.hint code {
+  background: color-mix(in srgb, var(--ink-secondary) 15%, transparent);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 0.85em;
+}
+
+.label {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-secondary);
+  margin: 12px 0 4px;
+}
+
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  padding: 9px 11px;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--ink-secondary) 35%, transparent);
+  background: color-mix(in srgb, white 40%, var(--paper-base));
+  color: var(--ink-primary);
+}
+
+.input:focus-visible {
+  outline: 2px solid var(--metal-base);
+  outline-offset: 1px;
+}
+
+.error {
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  color: #b3261e;
+  margin: 10px 0 0;
+}
+
+.submit {
+  width: 100%;
+  margin-top: 16px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 0.88rem;
+  padding: 10px;
+  border: none;
+  border-radius: 999px;
+  background: var(--cover-base);
+  color: var(--paper-base);
+  cursor: pointer;
+}
+
+.submit:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.submit:focus-visible {
+  outline: 2px solid var(--metal-base);
+  outline-offset: 2px;
+}
+
+.switchMode {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  background: none;
+  border: none;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  color: var(--ink-secondary);
+  text-decoration: underline;
+  cursor: pointer;
+}

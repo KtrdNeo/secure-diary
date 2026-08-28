@@ -1,0 +1,161 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+}
+
+.panel {
+  width: min(560px, 100%);
+  max-height: 80vh;
+  background: var(--paper-base);
+  color: var(--ink-primary);
+  border-radius: 12px;
+  padding: clamp(20px, 4vw, 30px);
+  box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.close {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: color-mix(in srgb, var(--ink-primary) 10%, transparent);
+  color: var(--ink-primary);
+  font-size: 1.15rem;
+  cursor: pointer;
+}
+
+.close:focus-visible {
+  outline: 2px solid var(--metal-base);
+  outline-offset: 2px;
+}
+
+.hint {
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  color: var(--ink-secondary);
+  margin: 8px 0 14px;
+  line-height: 1.5;
+}
+
+.empty {
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  color: var(--ink-secondary);
+}
+
+.body {
+  display: flex;
+  gap: 16px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 160px;
+  flex: 0 0 auto;
+  overflow-y: auto;
+  border-right: 1px solid color-mix(in srgb, var(--ink-secondary) 20%, transparent);
+}
+
+.listItem {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  color: var(--ink-primary);
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.listItem:hover {
+  background: color-mix(in srgb, var(--ink-secondary) 12%, transparent);
+}
+
+.listItem[aria-pressed='true'] {
+  background: var(--metal-base);
+  color: #1a1408;
+}
+
+.listItem:focus-visible {
+  outline: 2px solid var(--metal-base);
+  outline-offset: 1px;
+}
+
+.preview {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.previewText {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  font-family: var(--font-page);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  margin: 0;
+  padding: 4px;
+}
+
+.copyButton {
+  align-self: flex-start;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: none;
+  background: var(--metal-base);
+  color: #1a1408;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.copyButton:focus-visible {
+  outline: 2px solid var(--metal-dark);
+  outline-offset: 2px;
+}
+
+@media (max-width: 560px) {
+  .body {
+    flex-direction: column;
+  }
+  .list {
+    width: 100%;
+    max-height: 120px;
+    border-right: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--ink-secondary) 20%, transparent);
+  }
+}

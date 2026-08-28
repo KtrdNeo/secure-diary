@@ -1,0 +1,116 @@
+.screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: radial-gradient(
+    ellipse at 50% 20%,
+    color-mix(in srgb, var(--backdrop) 55%, white 12%) 0%,
+    var(--backdrop) 72%
+  );
+}
+
+.card {
+  width: min(400px, 100%);
+  background: var(--paper-base);
+  color: var(--ink-primary);
+  border-radius: 12px;
+  padding: clamp(24px, 5vw, 36px);
+  box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  margin: 0 0 12px;
+}
+
+.warning {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--ink-secondary);
+  background: color-mix(in srgb, var(--metal-base) 15%, transparent);
+  border-left: 3px solid var(--metal-base);
+  padding: 10px 12px;
+  border-radius: 4px;
+  margin: 0 0 20px;
+}
+
+.label {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-secondary);
+  margin: 12px 0 4px;
+}
+
+.input {
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--ink-secondary) 35%, transparent);
+  background: color-mix(in srgb, white 40%, var(--paper-base));
+  color: var(--ink-primary);
+}
+
+.input:focus-visible {
+  outline: 2px solid var(--metal-base);
+  outline-offset: 1px;
+}
+
+.showToggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  color: var(--ink-secondary);
+  margin-top: 12px;
+  cursor: pointer;
+}
+
+.error {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  color: #b3261e;
+  margin: 14px 0 0;
+}
+
+.submit {
+  margin-top: 20px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 11px;
+  border: none;
+  border-radius: 999px;
+  background: var(--cover-base);
+  color: var(--paper-base);
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.submit:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.submit:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.submit:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.submit:focus-visible {
+  outline: 2px solid var(--metal-base);
+  outline-offset: 2px;
+}

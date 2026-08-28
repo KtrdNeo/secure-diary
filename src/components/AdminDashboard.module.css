@@ -1,0 +1,217 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+}
+
+.panel {
+  width: min(520px, 100%);
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--paper-base);
+  color: var(--ink-primary);
+  border-radius: 12px;
+  padding: clamp(20px, 4vw, 30px);
+  box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.6);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+.close {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: color-mix(in srgb, var(--ink-primary) 10%, transparent);
+  color: var(--ink-primary);
+  font-size: 1.15rem;
+  cursor: pointer;
+}
+
+.close:focus-visible {
+  outline: 2px solid var(--metal-base);
+  outline-offset: 2px;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin: 16px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink-secondary) 20%, transparent);
+  padding-bottom: 8px;
+}
+
+.tab {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: var(--ink-secondary);
+  cursor: pointer;
+}
+
+.tab[aria-pressed='true'] {
+  background: var(--metal-base);
+  color: #1a1408;
+  font-weight: 600;
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--metal-base);
+  outline-offset: 2px;
+}
+
+.status {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  color: var(--ink-secondary);
+  background: color-mix(in srgb, var(--metal-base) 12%, transparent);
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin: 0 0 12px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hint {
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--ink-secondary);
+  margin: 0;
+}
+
+.actionButton {
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--ink-secondary) 30%, transparent);
+  background: color-mix(in srgb, white 30%, var(--paper-base));
+  color: var(--ink-primary);
+  cursor: pointer;
+  text-align: left;
+}
+
+.actionButton:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--metal-base) 15%, transparent);
+}
+
+.actionButton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.actionButton:focus-visible {
+  outline: 2px solid var(--metal-base);
+  outline-offset: 1px;
+}
+
+.smallButton {
+  align-self: flex-start;
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: none;
+  background: var(--metal-base);
+  color: #1a1408;
+  font-weight: 600;
+  cursor: pointer;
+  margin: -6px 0 4px;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.reportList {
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  margin: 4px 0 0;
+}
+
+.reportList dt {
+  font-weight: 600;
+  margin-top: 10px;
+  color: var(--ink-primary);
+}
+
+.reportList dd {
+  margin: 2px 0 0;
+  color: var(--ink-secondary);
+}
+
+.topicList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.topicButton {
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--ink-secondary) 30%, transparent);
+  background: transparent;
+  color: var(--ink-primary);
+  cursor: pointer;
+}
+
+.topicButton[aria-pressed='true'] {
+  background: var(--metal-base);
+  border-color: var(--metal-base);
+  color: #1a1408;
+  font-weight: 600;
+}
+
+.diagnosis {
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  margin-top: 8px;
+  background: color-mix(in srgb, white 25%, var(--paper-base));
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.diagnosisHeading {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-secondary);
+  margin: 10px 0 4px;
+}
+
+.diagnosis ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.diagnosis li {
+  margin-bottom: 4px;
+  line-height: 1.4;
+}

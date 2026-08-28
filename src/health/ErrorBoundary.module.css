@@ -1,0 +1,100 @@
+.appFallback {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: #1a1614;
+  font-family: system-ui, sans-serif;
+}
+
+.appCard {
+  width: min(440px, 100%);
+  background: #f2e8cf;
+  color: #3b2a1a;
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.6);
+}
+
+.appTitle {
+  font-size: 1.3rem;
+  margin: 0 0 10px;
+}
+
+.appHint {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: #6b5842;
+  margin: 0 0 18px;
+}
+
+.reloadButton {
+  width: 100%;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 11px;
+  border: none;
+  border-radius: 999px;
+  background: #6b4226;
+  color: #f2e8cf;
+  cursor: pointer;
+}
+
+.details {
+  margin-top: 16px;
+  font-size: 0.78rem;
+}
+
+.details summary {
+  cursor: pointer;
+  color: #6b5842;
+}
+
+.errorText {
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: rgba(0, 0, 0, 0.06);
+  padding: 10px;
+  border-radius: 6px;
+  margin-top: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.entryFallback {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 30px;
+  font-family: var(--font-ui, system-ui, sans-serif);
+}
+
+.entryTitle {
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.entryHint {
+  font-size: 0.85rem;
+  color: var(--ink-secondary, #6b5842);
+  max-width: 320px;
+  line-height: 1.5;
+  margin: 0 0 16px;
+}
+
+.retryButton {
+  font-family: inherit;
+  font-size: 0.82rem;
+  padding: 8px 20px;
+  border-radius: 999px;
+  border: none;
+  background: var(--metal-base, #b8935a);
+  color: #1a1408;
+  font-weight: 600;
+  cursor: pointer;
+}

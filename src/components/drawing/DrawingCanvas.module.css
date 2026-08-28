@@ -1,0 +1,123 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(10px, 3vw, 32px);
+  z-index: 100;
+}
+
+.panel {
+  width: min(900px, 100%);
+  height: min(620px, 92vh);
+  background: var(--paper-base);
+  border-radius: 12px;
+  box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: color-mix(in srgb, var(--cover-base) 90%, black 10%);
+  flex-wrap: wrap;
+}
+
+.colors {
+  display: flex;
+  gap: 6px;
+}
+
+.colorSwatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  background: var(--swatch-color);
+  cursor: pointer;
+  padding: 0;
+}
+
+.colorSwatch[aria-pressed='true'] {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.4);
+}
+
+.colorSwatch:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.snapToggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  color: #fff;
+  opacity: 0.9;
+  cursor: pointer;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.toolButton,
+.doneButton {
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+}
+
+.toolButton {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.toolButton:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.toolButton:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.doneButton {
+  background: var(--metal-base);
+  color: #1a1408;
+  font-weight: 600;
+}
+
+.doneButton:hover {
+  filter: brightness(1.08);
+}
+
+.toolButton:focus-visible,
+.doneButton:focus-visible,
+.snapToggle:focus-within {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.canvas {
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  touch-action: none; /* required so drawing gestures aren't hijacked as scroll/zoom */
+  cursor: crosshair;
+  background:
+    radial-gradient(ellipse at 50% 0%, transparent 70%, var(--paper-shadow) 165%),
+    var(--paper-base);
+}

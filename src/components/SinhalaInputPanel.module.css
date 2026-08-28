@@ -1,0 +1,170 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+}
+
+.panel {
+  width: min(460px, 100%);
+  background: var(--paper-base);
+  color: var(--ink-primary);
+  border-radius: 12px;
+  padding: clamp(20px, 4vw, 30px);
+  box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.6);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.close {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: color-mix(in srgb, var(--ink-primary) 10%, transparent);
+  color: var(--ink-primary);
+  font-size: 1.15rem;
+  cursor: pointer;
+}
+
+.close:focus-visible {
+  outline: 2px solid var(--metal-base);
+  outline-offset: 2px;
+}
+
+.modeToggle {
+  display: flex;
+  gap: 6px;
+  margin: 14px 0 10px;
+}
+
+.modeButton {
+  flex: 1;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  padding: 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--ink-secondary) 30%, transparent);
+  background: transparent;
+  color: var(--ink-primary);
+  cursor: pointer;
+}
+
+.modeButton[aria-pressed='true'] {
+  background: var(--metal-base);
+  border-color: var(--metal-base);
+  color: #1a1408;
+  font-weight: 600;
+}
+
+.modeButton:focus-visible {
+  outline: 2px solid var(--metal-base);
+  outline-offset: 2px;
+}
+
+.hint {
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--ink-secondary);
+  margin: 0 0 8px;
+}
+
+.textarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 80px;
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--ink-secondary) 35%, transparent);
+  background: color-mix(in srgb, white 40%, var(--paper-base));
+  color: var(--ink-primary);
+  resize: vertical;
+}
+
+.textarea:focus-visible {
+  outline: 2px solid var(--metal-base);
+  outline-offset: 1px;
+}
+
+.previewLabel {
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-secondary);
+  margin: 14px 0 4px;
+}
+
+.preview {
+  min-height: 60px;
+  font-family: var(--font-page);
+  font-size: 1.3rem;
+  line-height: 1.6;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--metal-base) 10%, transparent);
+}
+
+.previewEmpty {
+  color: var(--ink-secondary);
+  opacity: 0.5;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.toolButton,
+.doneButton {
+  flex: 1;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  padding: 10px 0;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+}
+
+.toolButton {
+  background: color-mix(in srgb, var(--ink-secondary) 15%, transparent);
+  color: var(--ink-primary);
+}
+
+.doneButton {
+  background: var(--metal-base);
+  color: #1a1408;
+  font-weight: 600;
+}
+
+.doneButton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.toolButton:focus-visible,
+.doneButton:focus-visible {
+  outline: 2px solid var(--metal-base);
+  outline-offset: 2px;
+}

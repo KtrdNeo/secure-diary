@@ -1,0 +1,37 @@
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 14px 20px;
+  font-family: var(--font-ui);
+}
+
+.credit {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--ink-secondary, #888);
+  opacity: 0.8;
+}
+
+.legalButton {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--ink-secondary, #888) 40%, transparent);
+  color: var(--ink-secondary, #888);
+  padding: 4px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.legalButton:hover {
+  background: color-mix(in srgb, var(--ink-secondary, #888) 15%, transparent);
+}
+
+.legalButton:focus-visible {
+  outline: 2px solid var(--metal-base, #888);
+  outline-offset: 2px;
+}

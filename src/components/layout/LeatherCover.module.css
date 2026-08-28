@@ -1,0 +1,43 @@
+.cover {
+  position: relative;
+  width: min(900px, 100%);
+  height: min(560px, 78vh);
+  max-height: 700px;
+  background-color: var(--cover-base);
+  background-image:
+    linear-gradient(135deg, var(--cover-highlight) 0%, transparent 45%),
+    radial-gradient(ellipse at 50% 45%, transparent 55%, var(--cover-shadow) 145%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch' result='n'/%3E%3CfeColorMatrix in='n' type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-blend-mode: normal, normal, overlay;
+  border-radius: var(--radius-cover);
+  box-shadow:
+    0 30px 60px -20px rgba(0, 0, 0, 0.55),
+    0 8px 20px -8px rgba(0, 0, 0, 0.4),
+    inset 0 2px 3px rgba(255, 255, 255, 0.18),
+    inset 0 -8px 16px rgba(0, 0, 0, 0.35);
+  padding: clamp(14px, 3vw, 30px);
+  display: flex;
+  gap: clamp(10px, 2vw, 20px);
+  align-items: stretch;
+  transition: background-color 0.5s ease;
+}
+
+/* Faint stitched border, ~10px in from the edge - a real detail on most
+   leather journals, and a cheap way to sell "crafted object" at a glance. */
+.stitching {
+  position: absolute;
+  inset: 12px;
+  border-radius: calc(var(--radius-cover) - 6px);
+  border: 1.5px dashed color-mix(in srgb, var(--metal-dark) 55%, transparent);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .cover {
+    height: min(520px, 82vh);
+    border-radius: calc(var(--radius-cover) * 0.7);
+    gap: 8px;
+    padding: 10px;
+  }
+}

@@ -1,0 +1,91 @@
+.switcher {
+  border: none;
+  margin: 0;
+  padding: 6px;
+  background: color-mix(in srgb, var(--cover-base) 85%, black 15%);
+  border-radius: 999px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.12);
+}
+
+.legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.options {
+  display: flex;
+  gap: 4px;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 4px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.option:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.25), 0 1px 3px rgba(0, 0, 0, 0.4);
+  flex: 0 0 auto;
+}
+
+.label {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  color: #fff;
+  opacity: 0.85;
+  white-space: nowrap;
+}
+
+.input:checked ~ .swatch {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(255, 255, 255, 0.3), 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.input:focus-visible ~ .swatch {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* Static preview colors per theme option - intentionally NOT sourced
+   from the live cover/paper variables, since these previews must render
+   correctly for all three themes regardless of which one is currently
+   active. Kept in sync with theme/themes.css by hand. */
+[data-theme-preview='light-leather'] .swatch {
+  background: linear-gradient(135deg, #8b5a2b 0%, #6b4226 52%, #efe2c0 52%, #efe2c0 100%);
+}
+[data-theme-preview='dark-obsidian'] .swatch {
+  background: linear-gradient(135deg, #2a2733 0%, #16141a 52%, #24242b 52%, #24242b 100%);
+}
+[data-theme-preview='sepia-vintage'] .swatch {
+  background: linear-gradient(135deg, #7a3f35 0%, #5c2a27 52%, #e8d9b5 52%, #e8d9b5 100%);
+}
+
+@media (max-width: 640px) {
+  .label {
+    display: none;
+  }
+  .option {
+    padding: 4px;
+  }
+}
