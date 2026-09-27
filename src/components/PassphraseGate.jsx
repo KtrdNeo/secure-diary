@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
+import { useState, useEffect } from 'react';
 import { db } from '../db/schema.js';
 import {
   generateSalt,
@@ -17,10 +16,25 @@ const MIN_LENGTH = 8;
  * session key. First run: create a passphrase (stores only a salt + a
  * verifier blob, never the passphrase itself). Returning: re-derive the
  * key and check it against the stored verifier.
+ *
+ * Fetches the setup record with a plain one-time Promise (useEffect +
+ * useState), not dexie-react-hooks' useLiveQuery. This is deliberate,
+ * fixed after a real production bug report (not something the Node/
+ * jsdom test suite could have caught, since it depends on IndexedDB's
+ * live-query/observable behavior in a real browser): this check only
+ * ever needs to run once at startup, and the live-query version could
+ * apparently get stuck never resolving in at least one real deployment,
+ * which - combined with the loading state below previously being a
+ * completely empty <div> - produced a permanent blank screen with no
+ * console error at all, since nothing ever threw. A one-time fetch is
+ * both the more correct tool for a value that's checked once, not
+ * subscribed to, AND lets failures be caught and shown explicitly
+ * instead of hanging silently forever.
  */
 export default function PassphraseGate({ children }) {
   const { cryptoKey, setCryptoKey } = useSessionKey();
-  const setupRecord = useLiveQuery(() => db.settings.get('passphraseSetup'), []);
+  const [setupRecord, setSetupRecord] = useState(undefined); // undefined = loading, null = no record yet, object = found
+  const [loadError, setLoadError] = useState(null);
 
   const [passphrase, setPassphrase] = useState('');
   const [confirmPassphrase, setConfirmPassphrase] = useState('');
@@ -28,10 +42,27 @@ export default function PassphraseGate({ children }) {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
+  useEffect(() => {
+    let cancelled = false;
+    db.settings
+      .get('passphraseSetup')
+      .then((record) => {
+        if (!cancelled) setSetupRecord(record ?? null);
+      })
+      .catch((err) => {
+        // eslint-disable-next-line no-console
+        console.error('PassphraseGate: failed to read setup record:', err);
+        if (!cancelled) setLoadError(err?.message || String(err));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   if (cryptoKey) return children;
 
-  const isLoading = setupRecord === undefined;
-  const isFirstRun = !isLoading && !setupRecord;
+  const isLoading = setupRecord === undefined && !loadError;
+  const isFirstRun = setupRecord === null;
   const inputType = showPassphrase ? 'text' : 'password';
 
   async function handleCreate(e) {
@@ -80,7 +111,31 @@ export default function PassphraseGate({ children }) {
   }
 
   if (isLoading) {
-    return <div className={styles.screen} aria-busy="true" />;
+    return (
+      <div className={styles.screen} aria-busy="true">
+        <p className={styles.loadingText}>Opening your diary…</p>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className={styles.screen}>
+        <div className={styles.card}>
+          <h1 className={styles.title}>Couldn&rsquo;t open your diary</h1>
+          <p className={styles.warning}>
+            {loadError} - your entries are untouched either way, this is just a local
+            database read that failed. Reloading usually fixes it.
+          </p>
+          <button type="button" className={styles.submit} onClick={() => window.location.reload()}>
+            Reload
+          </button>
+          <a href="/diagnostics.html" className={styles.diagLink} target="_blank" rel="noopener noreferrer">
+            Still stuck? Run diagnostics
+          </a>
+        </div>
+      </div>
+    );
   }
 
   return (

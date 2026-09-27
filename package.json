@@ -4,6 +4,7 @@
   "description": "Tactile, skeuomorphic, zero-knowledge encrypted local-first diary PWA.",
   "type": "module",
   "scripts": {
+    "prebuild": "node scripts/generate-build-info.mjs",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",

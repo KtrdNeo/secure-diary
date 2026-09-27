@@ -12,6 +12,22 @@
   );
 }
 
+.loadingText {
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  color: var(--ink-secondary, #6b5842);
+  opacity: 0.8;
+}
+
+.diagLink {
+  display: block;
+  text-align: center;
+  margin-top: 12px;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  color: var(--ink-secondary, #6b5842);
+}
+
 .card {
   width: min(400px, 100%);
   background: var(--paper-base);

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SecureDiary — Diagnostics</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #1a1614; color: #f2e8cf; max-width: 640px; margin: 0 auto; padding: 24px 20px 60px; }
+  h1 { font-size: 1.3rem; }
+  p.intro { color: #b8a98f; font-size: 0.88rem; line-height: 1.55; }
+  .check { display: flex; gap: 10px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .badge { flex: 0 0 auto; font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; letter-spacing: 0.03em; }
+  .badge.pass { background: #2e7d32; color: #eaffea; }
+  .badge.fail { background: #b3261e; color: #ffecec; }
+  .badge.info { background: #6b4226; color: #f2e8cf; }
+  .name { font-weight: 600; }
+  .detail { font-size: 0.8rem; color: #b8a98f; margin-top: 2px; }
+</style>
+</head>
+<body>
+  <h1>SecureDiary — Diagnostics</h1>
+  <p class="intro">
+    This page has no dependency on the main app's JavaScript bundle - if these checks are
+    running, this browser and this deployment can serve independently-runnable code, and each
+    check below actually exercises the real browser API it names (not a simulation). Nothing
+    here reads or touches your real diary entries.
+  </p>
+  <div id="results">Running checks…</div>
+
+<script>
+async function runDiagnostics() {
+  const results = [];
+  const add = (name, status, detail) => results.push({ name, status, detail });
+
+  try {
+    const res = await fetch('/build-info.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const info = await res.json();
+    add('Deployed build', 'info', 'v' + info.version + ', built ' + info.builtAt);
+  } catch (e) {
+    add('Deployed build info', 'fail', 'Could not load build-info.json: ' + e.message);
+  }
+
+  add('IndexedDB available', ('indexedDB' in window) ? 'pass' : 'fail');
+  add('Web Crypto (crypto.subtle) available', (window.crypto && window.crypto.subtle) ? 'pass' : 'fail');
+  add('Service Worker supported', ('serviceWorker' in navigator) ? 'pass' : 'fail');
+
+  try {
+    const key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const data = new TextEncoder().encode('diagnostic-test-value');
+    const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, data);
+    const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, encrypted);
+    const text = new TextDecoder().decode(decrypted);
+    add('Live AES-GCM encrypt/decrypt round trip', text === 'diagnostic-test-value' ? 'pass' : 'fail');
+  } catch (e) {
+    add('Live AES-GCM encrypt/decrypt round trip', 'fail', e.message);
+  }
+
+  try {
+    await new Promise((resolve, reject) => {
+      const req = indexedDB.open('__diagnostics_test__', 1);
+      req.onupgradeneeded = () => req.result.createObjectStore('t');
+      req.onerror = () => reject(req.error);
+      req.onsuccess = () => {
+        const db = req.result;
+        const tx = db.transaction('t', 'readwrite');
+        tx.objectStore('t').put('ok', 'k');
+        tx.oncomplete = () => {
+          const tx2 = db.transaction('t', 'readonly');
+          const getReq = tx2.objectStore('t').get('k');
+          getReq.onsuccess = () => {
+            db.close();
+            indexedDB.deleteDatabase('__diagnostics_test__');
+            getReq.result === 'ok' ? resolve() : reject(new Error('value mismatch on read-back'));
+          };
+          getReq.onerror = () => reject(getReq.error);
+        };
+        tx.onerror = () => reject(tx.error);
+      };
+    });
+    add('Live IndexedDB write/read round trip', 'pass');
+  } catch (e) {
+    add('Live IndexedDB write/read round trip', 'fail', e.message);
+  }
+
+  if ('serviceWorker' in navigator) {
+    try {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      add('Service worker registration', regs.length > 0 ? 'pass' : 'info',
+        regs.length > 0 ? regs.length + ' registration(s) found' : 'None yet - normal on a first-ever visit');
+    } catch (e) {
+      add('Service worker registration', 'fail', e.message);
+    }
+  }
+
+  render(results);
+}
+
+function render(results) {
+  document.getElementById('results').innerHTML = results.map(function (r) {
+    return '<div class="check">' +
+      '<span class="badge ' + r.status + '">' + r.status.toUpperCase() + '</span>' +
+      '<div><div class="name">' + r.name + '</div>' +
+      (r.detail ? '<div class="detail">' + r.detail + '</div>' : '') +
+      '</div></div>';
+  }).join('');
+}
+
+runDiagnostics().catch(function (e) {
+  document.getElementById('results').textContent = 'Diagnostics script itself failed: ' + e.message;
+});
+</script>
+</body>
+</html>

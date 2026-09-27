@@ -22,6 +22,9 @@ export default function Footer() {
       <button type="button" className={styles.legalButton} onClick={() => setLegalOpen(true)}>
         Legal &amp; About
       </button>
+      <a href="/diagnostics.html" className={styles.legalButton} target="_blank" rel="noopener noreferrer">
+        Diagnostics
+      </a>
       {legalOpen && <LegalModal onClose={() => setLegalOpen(false)} />}
       {syncOpen && <SyncPanel onClose={() => setSyncOpen(false)} />}
       {adminOpen && <AdminDashboard onClose={() => setAdminOpen(false)} />}

@@ -241,6 +241,27 @@ Date: 2026-08-22. Written under continued time pressure - concise by necessity. 
 
 This closes all 6 phases of the original roadmap.
 
+---
+
+## Post-deployment fix: blank screen on first real-browser run
+
+Date: 2026-08-30. First real-browser test of this entire project (everything before was Node/jsdom, which can't fully replicate IndexedDB's live-query behavior) surfaced a genuine bug within minutes: production build deployed cleanly, but the app showed a permanently blank screen with **zero console errors** - the "Foundation check: crypto OK, db OK" log fired (proving React mounted and Dexie opened fine), but nothing else ever appeared.
+
+**Root cause:** `PassphraseGate.jsx` used `dexie-react-hooks`'s `useLiveQuery` to check for an existing passphrase setup record, and its loading state was a literally empty `<div>`. In this real deployment, that query apparently never resolved - not an error, just permanently `undefined` - so the gate sat on its empty loading div forever, blocking the entire app behind it with no visible signal anything was wrong.
+
+**Fix:** replaced it with a plain one-time `useEffect` + `Promise` fetch (this check only ever needs to run once at startup, it was never a case that actually benefited from `useLiveQuery`'s live-subscription behavior), added a visible "Opening your diary\u2026" loading state, and added explicit error handling with a reload button if the fetch itself fails. This mirrors a lesson already learned once before in this project (Phase 1's original `PassphraseGate` draft) - now actually fixed at its root rather than partially.
+
+**Not yet ruled out:** other components (`DiaryShell.jsx`, `SearchIndexProvider.jsx`, `SyncProvider.jsx`, `VersionHistory.jsx`) also use `useLiveQuery`. This fix targets the one component *proven* to have hung; if the app still gets stuck somewhere *after* unlocking, that's the next place to look, using the same fix pattern.
+
+**Also noted, not fixed:** Supabase's Security Advisor flagged `public.rls_auto_enable()` as a SECURITY DEFINER function callable without signing in. Confirmed this does not appear anywhere in `supabase/schema.sql` - it's not something this project created, most likely a Supabase-platform-level function. Not investigated further given it's unrelated to the blank-screen bug and lower priority; worth asking Supabase support/docs about directly if it needs resolving.
 
 
 
+
+
+
+---
+
+## Built-in diagnostics page (trust problem)
+
+Date: 2026-09-24. After the blank-screen incident, added `public/diagnostics.html` - a standalone page with **zero dependency on the React bundle**, reachable at `/diagnostics.html` and linked from the Footer and from `PassphraseGate`'s own error state (the exact scenario it exists for). It runs live, real checks in the browser - not simulated, not trusting any prior claim: fetches `build-info.json` (auto-generated at build time via a `prebuild` npm hook, so it always reflects the actual deployed build's version + timestamp), confirms IndexedDB/Web Crypto/Service Worker are actually present, then runs a genuine AES-GCM encrypt/decrypt round trip and a genuine IndexedDB write/read round trip against a disposable test database - not the real one. If the main app ever fails to render again, this page is the independent way to check whether the deployment itself is healthy, without needing to trust anything Claude said about it.
