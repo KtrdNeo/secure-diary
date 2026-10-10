@@ -69,3 +69,27 @@
   font-family: var(--font-ui);
   color: var(--ink-secondary);
 }
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.confirm {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dangerLink {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  color: #b3261e;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}

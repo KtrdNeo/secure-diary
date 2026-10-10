@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { db } from '../db/schema.js';
 import { useSessionKey } from '../session/SessionKeyProvider.jsx';
 import { runFullDiagnostics, clearStuckSyncQueueItems } from '../health/diagnostics.js';
@@ -7,17 +7,11 @@ import { exportBackup, importBackup } from '../health/backup.js';
 import { exportEntriesToPdf } from '../health/pdfExport.js';
 import { decryptData, decryptBinary } from '../utils/crypto.js';
 import { decodeYDoc, yDocToPlainText } from './editor/yjsUtils.js';
+import { downloadBytes } from '../features/download.js';
+import { countDeleted, restoreDeletedEntries } from '../features/trash.js';
 import styles from './AdminDashboard.module.css';
 
-function downloadBlob(bytes, filename, mimeType) {
-  const blob = new Blob([bytes], { type: mimeType });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-}
+const downloadBlob = downloadBytes;
 
 export default function AdminDashboard({ onClose }) {
   const { cryptoKey } = useSessionKey();
@@ -27,6 +21,30 @@ export default function AdminDashboard({ onClose }) {
   const [topic, setTopic] = useState(null);
   const [statusMessage, setStatusMessage] = useState('');
   const fileInputRef = useRef(null);
+  const [trashCount, setTrashCount] = useState(null);
+
+  useEffect(() => {
+    const onKey = (e) => e.key === 'Escape' && onClose();
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  useEffect(() => {
+    if (tab !== 'trash') return undefined;
+    let cancelled = false;
+    countDeleted(db).then((n) => {
+      if (!cancelled) setTrashCount(n);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [tab]);
+
+  async function handleRestoreTrash() {
+    const n = await restoreDeletedEntries(db);
+    setTrashCount(0);
+    setStatusMessage(n ? `Restored ${n} entr${n === 1 ? 'y' : 'ies'}.` : 'Trash is empty.');
+  }
 
   const refreshReport = useCallback(async () => {
     setLoadingReport(true);
@@ -104,6 +122,7 @@ export default function AdminDashboard({ onClose }) {
           {[
             ['health', 'Health'],
             ['diagnose', 'Diagnose'],
+            ['trash', 'Trash'],
             ['backup', 'Backup'],
             ['export', 'Export'],
           ].map(([id, label]) => (
@@ -198,6 +217,26 @@ export default function AdminDashboard({ onClose }) {
                 )}
               </div>
             )}
+          </div>
+        )}
+
+        {tab === 'trash' && (
+          <div className={styles.section}>
+            <p className={styles.hint}>
+              Deleted entries stay here, still encrypted, until restored. Restored entries return to the diary
+              in their original order.
+            </p>
+            <p className={styles.hint}>
+              {trashCount === null ? 'Checking…' : `${trashCount} entr${trashCount === 1 ? 'y' : 'ies'} in the trash.`}
+            </p>
+            <button
+              type="button"
+              className={styles.actionButton}
+              onClick={handleRestoreTrash}
+              disabled={!trashCount}
+            >
+              Restore all
+            </button>
           </div>
         )}
 

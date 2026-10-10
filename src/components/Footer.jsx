@@ -2,6 +2,7 @@ import { useState } from 'react';
 import LegalModal from './LegalModal.jsx';
 import SyncPanel from './SyncPanel.jsx';
 import AdminDashboard from './AdminDashboard.jsx';
+import HelpModal from './HelpModal.jsx';
 import { APP_CREDIT } from '../config/legal.js';
 import styles from './Footer.module.css';
 
@@ -9,10 +10,14 @@ export default function Footer() {
   const [legalOpen, setLegalOpen] = useState(false);
   const [syncOpen, setSyncOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   return (
     <footer className={styles.footer}>
       <p className={styles.credit}>{APP_CREDIT}</p>
+      <button type="button" className={styles.legalButton} onClick={() => setHelpOpen(true)}>
+        Help
+      </button>
       <button type="button" className={styles.legalButton} onClick={() => setAdminOpen(true)}>
         Admin
       </button>
@@ -25,6 +30,7 @@ export default function Footer() {
       <a href="/diagnostics.html" className={styles.legalButton} target="_blank" rel="noopener noreferrer">
         Diagnostics
       </a>
+      {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}
       {legalOpen && <LegalModal onClose={() => setLegalOpen(false)} />}
       {syncOpen && <SyncPanel onClose={() => setSyncOpen(false)} />}
       {adminOpen && <AdminDashboard onClose={() => setAdminOpen(false)} />}

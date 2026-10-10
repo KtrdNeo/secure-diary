@@ -52,6 +52,25 @@
   margin: 0 0 0.9em;
 }
 
+/* Tailwind's preflight strips list markers; restore them for plain lists
+   (task/choice lists below override this with their own list-style: none). */
+.prose ul {
+  list-style: disc;
+}
+
+.prose ol {
+  list-style: decimal;
+}
+
+.prose li > p {
+  margin: 0;
+}
+
+.prose li[data-type='taskItem'] > div > p,
+.prose div[data-radio-content] > p {
+  margin: 0;
+}
+
 .prose blockquote {
   margin: 0 0 0.9em;
   padding-left: 0.9em;

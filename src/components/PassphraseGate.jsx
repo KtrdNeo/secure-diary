@@ -59,6 +59,18 @@ export default function PassphraseGate({ children }) {
     };
   }, []);
 
+  // Locking (or auto-lock) returns here with the gate still mounted: wipe the
+  // typed passphrase so it can never be reused (or resubmitted by mistake).
+  useEffect(() => {
+    if (!cryptoKey) {
+      setPassphrase('');
+      setConfirmPassphrase('');
+      setShowPassphrase(false);
+      setError('');
+      setBusy(false);
+    }
+  }, [cryptoKey]);
+
   if (cryptoKey) return children;
 
   const isLoading = setupRecord === undefined && !loadError;
@@ -78,10 +90,23 @@ export default function PassphraseGate({ children }) {
     }
     setBusy(true);
     try {
+      // Never overwrite an existing setup: replacing the salt would make every
+      // existing entry permanently undecryptable.
+      const existing = await db.settings.get('passphraseSetup');
+      if (existing) {
+        setSetupRecord(existing);
+        setPassphrase('');
+        setConfirmPassphrase('');
+        setError('This diary already has a passphrase - enter it to unlock.');
+        setBusy(false);
+        return;
+      }
       const salt = generateSalt();
       const key = await deriveKeyFromPassphrase(passphrase, salt);
       const verifier = await createVerifier(key);
-      await db.settings.put({ key: 'passphraseSetup', value: { salt, verifier } });
+      const record = { key: 'passphraseSetup', value: { salt, verifier } };
+      await db.settings.put(record);
+      setSetupRecord(record); // so a later Lock shows the unlock form, not first-run
       setCryptoKey(key);
     } catch {
       setError('Something went wrong setting up encryption. Please try again.');

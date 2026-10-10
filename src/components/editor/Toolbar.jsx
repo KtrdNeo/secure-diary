@@ -2,11 +2,11 @@ import { useEditorState } from '@tiptap/react';
 import { countTaskProgress } from './docUtils.js';
 import styles from './Toolbar.module.css';
 
-function ToolButton({ active, disabled, onClick, label, children }) {
+function ToolButton({ active, disabled, onClick, label, text, children }) {
   return (
     <button
       type="button"
-      className={styles.button}
+      className={text ? `${styles.button} ${styles.labelled}` : styles.button}
       aria-pressed={active}
       aria-label={label}
       title={label}
@@ -15,6 +15,7 @@ function ToolButton({ active, disabled, onClick, label, children }) {
       onClick={onClick}
     >
       {children}
+      {text && <span className={styles.text}>{text}</span>}
     </button>
   );
 }
@@ -87,31 +88,32 @@ export default function Toolbar({ editor, onRequestDrawing, onRequestVoiceNote, 
         <ToolButton label="Numbered list" active={state.orderedList} onClick={() => editor.chain().focus().toggleOrderedList().run()}>
           1.
         </ToolButton>
-        <ToolButton label="Checklist" active={state.taskList} onClick={() => editor.chain().focus().toggleTaskList().run()}>
+        <ToolButton label="Checklist" text="Checklist" active={state.taskList} onClick={() => editor.chain().focus().toggleTaskList().run()}>
           ☑
         </ToolButton>
-        <ToolButton label="Choice list" onClick={() => editor.chain().focus().insertRadioGroup().run()}>
+        <ToolButton label="Choice list" text="Choices" onClick={() => editor.chain().focus().insertRadioGroup().run()}>
           ◎
         </ToolButton>
         <ToolButton
           label="Table"
+          text="Table"
           onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
         >
           ▦
         </ToolButton>
-        <ToolButton label="Callout" active={state.callout} onClick={() => editor.chain().focus().setCallout('info').run()}>
+        <ToolButton label="Callout" text="Note" active={state.callout} onClick={() => editor.chain().focus().setCallout('info').run()}>
           ⓘ
         </ToolButton>
       </div>
 
       <div className={styles.group}>
-        <ToolButton label="Insert drawing" onClick={onRequestDrawing}>
+        <ToolButton label="Insert drawing" text="Draw" onClick={onRequestDrawing}>
           ✎
         </ToolButton>
-        <ToolButton label="Insert voice note" onClick={onRequestVoiceNote}>
+        <ToolButton label="Insert voice note" text="Voice" onClick={onRequestVoiceNote}>
           ●
         </ToolButton>
-        <ToolButton label="Sinhala input" onClick={onRequestSinhala}>
+        <ToolButton label="Sinhala input" text="Sinhala" onClick={onRequestSinhala}>
           අ
         </ToolButton>
       </div>

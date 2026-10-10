@@ -81,6 +81,24 @@
   font-variant-numeric: tabular-nums;
 }
 
+.labelled {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 8px;
+}
+
+.text {
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+@media (max-width: 480px) {
+  .text {
+    display: none;
+  }
+}
+
 @media (max-width: 640px) {
   .group {
     padding: 0 3px;

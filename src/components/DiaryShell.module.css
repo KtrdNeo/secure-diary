@@ -18,6 +18,7 @@
   align-items: center;
   justify-content: center;
   padding: clamp(16px, 4vw, 48px);
+  padding-top: clamp(64px, 9vw, 84px);
 }
 
 .switcherSlot {
@@ -26,13 +27,21 @@
   right: clamp(10px, 3vw, 26px);
 }
 
-.searchButton {
+.topBar {
   position: absolute;
   top: clamp(10px, 3vw, 26px);
   left: clamp(10px, 3vw, 26px);
+  right: 170px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  z-index: 5;
+}
+
+.pill {
   font-family: var(--font-ui);
   font-size: 0.78rem;
-  padding: 8px 16px;
+  padding: 8px 14px;
   border-radius: 999px;
   border: none;
   background: color-mix(in srgb, var(--cover-base) 85%, black 15%);
@@ -41,11 +50,11 @@
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.12);
 }
 
-.searchButton:hover {
+.pill:hover {
   filter: brightness(1.1);
 }
 
-.searchButton:focus-visible {
+.pill:focus-visible {
   outline: 2px solid #fff;
   outline-offset: 2px;
 }
@@ -68,13 +77,15 @@
     order: 2;
   }
 
-  .searchButton {
+  .topBar {
     position: static;
-    margin: 12px auto 0;
+    justify-content: center;
+    margin-top: 12px;
     order: 1;
   }
 
   .stage {
+    padding-top: 16px;
     flex-direction: column;
   }
 }

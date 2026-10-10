@@ -1,0 +1,123 @@
+.card {
+  margin: 8px clamp(16px, 3vw, 28px) 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px dashed color-mix(in srgb, var(--ink-secondary) 45%, transparent);
+  background: color-mix(in srgb, var(--metal-base) 8%, transparent);
+  font-family: var(--font-ui);
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.dismiss {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  line-height: 1;
+  color: var(--ink-secondary);
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.lead {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--ink-secondary);
+}
+
+.templates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+.template {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--ink-secondary) 35%, transparent);
+  background: var(--paper-base);
+  color: var(--ink-primary);
+  font-family: var(--font-ui);
+  font-size: 0.74rem;
+  cursor: pointer;
+}
+
+.template:hover {
+  background: var(--metal-base);
+  color: #1a1408;
+}
+
+.template:focus-visible,
+.link:focus-visible {
+  outline: 2px solid var(--metal-base);
+  outline-offset: 2px;
+}
+
+.icon {
+  font-size: 0.95rem;
+}
+
+.prompt {
+  border-top: 1px solid color-mix(in srgb, var(--ink-secondary) 20%, transparent);
+  padding-top: 6px;
+}
+
+.promptLabel {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-secondary);
+}
+
+.promptText {
+  margin: 2px 0 4px;
+  font-family: var(--font-page);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--ink-primary);
+}
+
+.promptActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  color: var(--ink-secondary);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .card {
+    padding: 8px 10px;
+    max-height: 46%;
+    overflow-y: auto;
+  }
+  .templates {
+    gap: 4px;
+  }
+  .template {
+    padding: 4px 9px;
+    font-size: 0.72rem;
+  }
+  .promptText {
+    font-size: 0.85rem;
+  }
+}

@@ -4,6 +4,13 @@ import DrawingCanvas from '../drawing/DrawingCanvas.jsx';
 import VoiceRecorder from '../voice/VoiceRecorder.jsx';
 import VersionHistory from './VersionHistory.jsx';
 import SinhalaInputPanel from '../SinhalaInputPanel.jsx';
+import WelcomeCard from './WelcomeCard.jsx';
+import { buildTemplate } from '../../features/templates.js';
+import { enqueueSync } from '../../features/syncQueue.js';
+import { softDeleteEntry } from '../../features/trash.js';
+import { downloadBytes } from '../../features/download.js';
+import { countWords, readingMinutes } from '../../features/textStats.js';
+import { FLUSH_BEFORE_LOCK_EVENT } from '../../features/autoLock.js';
 import { encryptData, decryptData, encryptBinary, decryptBinary } from '../../utils/crypto.js';
 import { useSessionKey } from '../../session/SessionKeyProvider.jsx';
 import { db } from '../../db/schema.js';
@@ -14,32 +21,21 @@ const AUTOSAVE_DELAY_MS = 2000; // Feature 13: 2-second real-time draft autosave
 const SNAPSHOT_MIN_INTERVAL_MS = 5 * 60 * 1000; // don't version-history-spam on every autosave
 
 /**
- * Adds a sync queue entry for this entity, unless one is already
- * pending for it - otherwise every autosave tick during active editing
- * would pile up a fresh queue row for the same entry, when all the
- * sync engine actually needs is "this entity has unsynced changes,
- * push its current state" once.
- */
-async function enqueueSync(entityType, entityId) {
-  const existing = await db.syncQueue.where({ entityType, entityId }).first();
-  if (existing) return;
-  await db.syncQueue.add({ entityType, entityId, operation: 'upsert', createdAt: Date.now(), attempts: 0 });
-}
-
-/**
  * Assumes it's remounted (via a `key` prop keyed on entryId) whenever the
  * person navigates to a different entry, rather than receiving a changed
  * `entryId` on a live instance - simpler and safer than handling
  * mid-lifecycle entry switches internally. DiaryShell is responsible for
  * that key.
  */
-export default function EntryEditor({ entryId, onEntryCreated }) {
+export default function EntryEditor({ entryId, onEntryCreated, onOpenHelp }) {
   const { cryptoKey } = useSessionKey();
   const editorRef = useRef(null);
   const saveTimerRef = useRef(null);
   const currentEntryIdRef = useRef(entryId ?? null);
   const remoteIdRef = useRef(null);
   const lastSnapshotAtRef = useRef(0);
+  const loadFailedRef = useRef(false);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   const [title, setTitle] = useState('');
   const [ydoc, setYdoc] = useState(null); // null until loaded/created
@@ -47,7 +43,9 @@ export default function EntryEditor({ entryId, onEntryCreated }) {
   const [migrationNotice, setMigrationNotice] = useState(false);
   const [savedAt, setSavedAt] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [overlay, setOverlay] = useState(null); // 'drawing' | 'voice' | 'history' | null
+  const [overlay, setOverlay] = useState(null); // 'drawing' | 'voice' | 'sinhala' | 'history' | null
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [welcomeHidden, setWelcomeHidden] = useState(false);
 
   // Load + decrypt an existing entry on mount, or start a fresh Y.Doc.
   useEffect(() => {
@@ -91,8 +89,13 @@ export default function EntryEditor({ entryId, onEntryCreated }) {
         }
         remoteIdRef.current = record.remoteId || null;
       } catch {
-        // Leave blank rather than crash the whole app on one bad/foreign record.
-        if (!cancelled) setYdoc(createEmptyYDoc());
+        // Show blank rather than crash the app on one unreadable record - but
+        // NEVER autosave over it: the stored entry must stay untouched.
+        if (!cancelled) {
+          loadFailedRef.current = true;
+          setLoadFailed(true);
+          setYdoc(createEmptyYDoc());
+        }
       }
     });
 
@@ -113,7 +116,7 @@ export default function EntryEditor({ entryId, onEntryCreated }) {
    */
   const saveEntry = useCallback(
     async (nextTitle) => {
-      if (!cryptoKey || !ydoc) return null;
+      if (!cryptoKey || !ydoc || loadFailedRef.current) return null;
       setSaving(true);
       try {
         const titlePayload = await encryptData({ title: nextTitle }, cryptoKey);
@@ -169,7 +172,7 @@ export default function EntryEditor({ entryId, onEntryCreated }) {
   );
 
   useEffect(() => {
-    if (!loaded) return undefined;
+    if (!loaded || loadFailedRef.current) return undefined;
     const isEmpty = yDocToPlainText(ydoc).length === 0;
     if (isEmpty && !title.trim() && currentEntryIdRef.current == null) return undefined;
 
@@ -182,6 +185,61 @@ export default function EntryEditor({ entryId, onEntryCreated }) {
     // effect above) - changeTick is what actually signals new edits to save.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [title, changeTick, loaded, saveEntry]);
+
+  // Let Lock flush a pending autosave before the key is wiped.
+  const titleRef = useRef(title);
+  titleRef.current = title;
+  useEffect(() => {
+    function onFlush(e) {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = null;
+        e.detail?.promises?.push(saveEntry(titleRef.current));
+      }
+    }
+    window.addEventListener(FLUSH_BEFORE_LOCK_EVENT, onFlush);
+    return () => window.removeEventListener(FLUSH_BEFORE_LOCK_EVENT, onFlush);
+  }, [saveEntry]);
+
+  // Plain text of the current doc (recomputed per edit) - drives the empty-page
+  // welcome card and the word count.
+  const plainText = ydoc ? yDocToPlainText(ydoc) : '';
+  // changeTick is read so this re-renders on each edit.
+  void changeTick;
+  const wordCount = countWords(plainText);
+  const isBlankPage = plainText.length === 0 && !title.trim();
+
+  function handlePickTemplate(id) {
+    const built = buildTemplate(id);
+    if (!built) return;
+    setTitle(built.title);
+    editorRef.current?.chain().focus().insertContent(built.content).run();
+  }
+
+  function handleUsePrompt(prompt) {
+    editorRef.current
+      ?.chain()
+      .focus()
+      .insertContent([
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: prompt }] }] },
+        { type: 'paragraph' },
+      ])
+      .run();
+  }
+
+  async function handleDelete() {
+    setConfirmDelete(false);
+    if (currentEntryIdRef.current == null) return;
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    await softDeleteEntry(db, currentEntryIdRef.current);
+  }
+
+  function handleExportText() {
+    const header = title.trim() || 'Untitled entry';
+    const text = `${header}\n${'='.repeat(header.length)}\n\n${plainText}\n`;
+    const safe = header.replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '').slice(0, 40) || 'entry';
+    downloadBytes(new TextEncoder().encode(text), `${safe}.txt`, 'text/plain');
+  }
 
   async function handleDrawingSave(strokes) {
     setOverlay(null);
@@ -251,11 +309,24 @@ export default function EntryEditor({ entryId, onEntryCreated }) {
         onChange={(e) => setTitle(e.target.value)}
       />
 
+      {loadFailed && (
+        <p className={styles.migrationNotice}>
+          This entry couldn&rsquo;t be decrypted, so it is shown blank and will not be overwritten. Lock and
+          unlock with your original passphrase, or restore a backup from Admin.
+        </p>
+      )}
+
       {migrationNotice && (
         <p className={styles.migrationNotice}>
           This entry was written before version history existed - its title carried over, but
           please re-check its body text.
         </p>
+      )}
+
+      {isBlankPage && !welcomeHidden && (
+        <WelcomeCard onPickTemplate={handlePickTemplate} onUsePrompt={handleUsePrompt} onOpenHelp={onOpenHelp}
+          onDismiss={() => setWelcomeHidden(true)}
+        />
       )}
 
       <RichTextEditor
@@ -268,15 +339,43 @@ export default function EntryEditor({ entryId, onEntryCreated }) {
       />
 
       <div className={styles.status}>
-        <button
-          type="button"
-          className={styles.historyLink}
-          onClick={() => setOverlay('history')}
-          disabled={currentEntryIdRef.current == null}
-        >
-          History
-        </button>
-        <span>{saving ? 'Saving…' : savedAt ? `Saved ${new Date(savedAt).toLocaleTimeString()}` : ' '}</span>
+        <span className={styles.actions}>
+          <button
+            type="button"
+            className={styles.historyLink}
+            onClick={() => setOverlay('history')}
+            disabled={currentEntryIdRef.current == null}
+          >
+            History
+          </button>
+          <button type="button" className={styles.historyLink} onClick={handleExportText} disabled={wordCount === 0}>
+            Export
+          </button>
+          {confirmDelete ? (
+            <span className={styles.confirm}>
+              Move to trash?{' '}
+              <button type="button" className={styles.dangerLink} onClick={handleDelete}>
+                Yes
+              </button>
+              <button type="button" className={styles.historyLink} onClick={() => setConfirmDelete(false)}>
+                Cancel
+              </button>
+            </span>
+          ) : (
+            <button
+              type="button"
+              className={styles.historyLink}
+              onClick={() => setConfirmDelete(true)}
+              disabled={currentEntryIdRef.current == null}
+            >
+              Delete
+            </button>
+          )}
+        </span>
+        <span>
+          {wordCount > 0 && `${wordCount} word${wordCount === 1 ? '' : 's'} · ${readingMinutes(wordCount)} min read · `}
+          {saving ? 'Saving…' : savedAt ? `Saved ${new Date(savedAt).toLocaleTimeString()}` : ' '}
+        </span>
       </div>
 
       {overlay === 'drawing' && <DrawingCanvas onSave={handleDrawingSave} onCancel={() => setOverlay(null)} />}

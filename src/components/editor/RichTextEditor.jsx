@@ -94,12 +94,17 @@ export default function RichTextEditor({
 
   return (
     <div className={styles.wrapper}>
-      <Toolbar
-        editor={editor}
-        onRequestDrawing={onRequestDrawing}
-        onRequestVoiceNote={onRequestVoiceNote}
-        onRequestSinhala={onRequestSinhala}
-      />
+      {/* Mount the toolbar only once the editor exists: useEditorState
+          bound to a null editor never picked it up in real browsers. */}
+      {editor && (
+        <Toolbar
+          key={editor.instanceId ?? 'toolbar'}
+          editor={editor}
+          onRequestDrawing={onRequestDrawing}
+          onRequestVoiceNote={onRequestVoiceNote}
+          onRequestSinhala={onRequestSinhala}
+        />
+      )}
       <EditorContent editor={editor} className={styles.editorContent} />
     </div>
   );

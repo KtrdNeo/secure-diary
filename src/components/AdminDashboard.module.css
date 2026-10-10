@@ -215,3 +215,12 @@
   margin-bottom: 4px;
   line-height: 1.4;
 }
+
+.tabs {
+  overflow-x: auto;
+  flex-wrap: nowrap;
+}
+
+.tab {
+  flex-shrink: 0;
+}
