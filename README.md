@@ -9,6 +9,10 @@ Created & developed by Prabhath Kaushalaya, call / WA +94 770020223
 See `CHECKPOINT_SUMMARY.md` for the full build log, key decisions, and
 known limitations.
 
+## Features at a glance
+
+Templates and daily writing prompts, rich text (checklists, choice lists, tables, notes), drawing, voice notes, Sinhala input, search, version history, writing streaks, word count, trash/restore, Lock + auto-lock, encrypted backup/restore, PDF/text export, optional encrypted sync. Open **Help** in the app for a tour.
+
 ## Deploying
 
 ```bash
