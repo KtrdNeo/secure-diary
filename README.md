@@ -13,6 +13,10 @@ known limitations.
 
 Templates and daily writing prompts, rich text (checklists, choice lists, tables, notes), drawing, voice notes, Sinhala input, search, version history, writing streaks, word count, trash/restore, Lock + auto-lock, encrypted backup/restore, PDF/text export, optional encrypted sync. Open **Help** in the app for a tour.
 
+## Responsive QA
+
+`npm run build && npx vite preview --port 4180 &` then `python3 scripts/responsive-audit.py` (needs Python Playwright) screenshots the app on 9 device sizes into `audit/` and lists layout problems. `scripts/responsive-sweep.py` runs a 750-combination size/text-scale/theme sweep. `scripts/browser-smoke.py` checks lock/unlock, delete/restore and wrong-passphrase flows.
+
 ## Deploying
 
 ```bash
