@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import PaperSurface from './PaperSurface.jsx';
+import { ChevronLeftIcon, ChevronRightIcon } from '../icons.jsx';
 import styles from './PageFlipBook.module.css';
 
 /**
@@ -93,33 +94,57 @@ export default function PageFlipBook({ pages, fill = false, jumpToIndex = null, 
     : (flip.animate ? 0 : -179);
 
   return (
-    <div className={styles.perspective}>
-      <div className={styles.staticLayer}>
-        <PaperSurface
-          onNextCorner={goNext}
-          onPrevCorner={goPrev}
-          showNext={currentIndex < pages.length - 1}
-          showPrev={currentIndex > 0}
-          fill={fill}
-        >
-          {pages[currentIndex]}
-        </PaperSurface>
-      </div>
-
-      {flip && (
-        <div
-          className={styles.flipLayer}
-          style={{ transform: `rotateY(${rotation}deg)` }}
-          onTransitionEnd={handleFlipTransitionEnd}
-        >
-          <PaperSurface interactive={false} fill={fill}>
-            {pages[flip.otherIndex]}
+    <div className={styles.book}>
+      <div className={styles.perspective}>
+        <div className={styles.staticLayer}>
+          <PaperSurface
+            onNextCorner={goNext}
+            onPrevCorner={goPrev}
+            showNext={currentIndex < pages.length - 1}
+            showPrev={currentIndex > 0}
+            fill={fill}
+          >
+            {pages[currentIndex]}
           </PaperSurface>
         </div>
-      )}
 
-      <div className={styles.pageIndicator} aria-live="polite">
-        {currentIndex + 1} / {pages.length}
+        {flip && (
+          <div
+            className={styles.flipLayer}
+            style={{ transform: `rotateY(${rotation}deg)` }}
+            onTransitionEnd={handleFlipTransitionEnd}
+          >
+            <PaperSurface interactive={false} fill={fill}>
+              {pages[flip.otherIndex]}
+            </PaperSurface>
+          </div>
+        )}
+      </div>
+
+      {/* Visible page navigation: big, thumb-friendly targets (the folded
+          corner stays as the tactile desktop gesture). */}
+      <div className={styles.pageNav}>
+        <button
+          type="button"
+          className={styles.navButton}
+          onClick={goPrev}
+          disabled={currentIndex <= 0 || !!flip}
+          aria-label="Previous entry"
+        >
+          <ChevronLeftIcon />
+        </button>
+        <span className={styles.pageIndicator} aria-live="polite">
+          Page {currentIndex + 1} of {pages.length}
+        </span>
+        <button
+          type="button"
+          className={styles.navButton}
+          onClick={goNext}
+          disabled={currentIndex >= pages.length - 1 || !!flip}
+          aria-label="Next entry"
+        >
+          <ChevronRightIcon />
+        </button>
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { decryptBinary } from '../../utils/crypto.js';
 import { useSessionKey } from '../../session/SessionKeyProvider.jsx';
 import { decodeYDoc, yDocToPlainText } from './yjsUtils.js';
 import styles from './VersionHistory.module.css';
+import { useEscape } from '../../hooks/useEscape.js';
 
 /**
  * Shows past snapshots of this entry (see EntryEditor's snapshot-on-
@@ -18,6 +19,7 @@ import styles from './VersionHistory.module.css';
  * corrupt anything.
  */
 export default function VersionHistory({ entryId, onClose }) {
+  useEscape(onClose);
   const { cryptoKey } = useSessionKey();
   const [selectedId, setSelectedId] = useState(null);
   const [previewText, setPreviewText] = useState('');

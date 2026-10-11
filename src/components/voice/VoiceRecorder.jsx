@@ -138,7 +138,7 @@ export default function VoiceRecorder({ onSave, onCancel }) {
 
   return (
     <div className={styles.overlay}>
-      <div className={styles.panel}>
+      <div className={styles.panel} role="dialog" aria-modal="true" aria-label="Voice note">
         {state === 'idle' && (
           <>
             <p className={styles.hint}>Record a voice note for this entry.</p>

@@ -1,17 +1,18 @@
 .toolbar {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   flex-wrap: wrap;
-  padding: 6px 8px;
+  padding: 6px clamp(8px, 2vw, 14px);
   border-bottom: 1px solid color-mix(in srgb, var(--ink-secondary) 20%, transparent);
   font-family: var(--font-ui);
 }
 
 .group {
+  flex: 0 0 auto;
   display: flex;
   gap: 2px;
-  padding: 0 6px;
+  padding: 0 4px;
   border-right: 1px solid color-mix(in srgb, var(--ink-secondary) 15%, transparent);
 }
 
@@ -20,9 +21,9 @@
 }
 
 .button {
-  min-width: 28px;
-  height: 28px;
-  padding: 0 6px;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 7px;
   border: none;
   border-radius: 5px;
   background: transparent;
@@ -54,6 +55,7 @@
 }
 
 .progressWrap {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -62,7 +64,7 @@
 }
 
 .progressTrack {
-  width: 72px;
+  width: 44px;
   height: 6px;
   border-radius: 999px;
   background: color-mix(in srgb, var(--ink-secondary) 20%, transparent);
@@ -93,18 +95,86 @@
   font-weight: 500;
 }
 
-@media (max-width: 480px) {
-  .text {
+/* Phones and small tablets: ONE swipeable row instead of a wrapping block that
+   eats half the page. Big touch targets; labels shown from 520px up. */
+@media (max-width: 699px), (max-height: 500px) {
+  .toolbar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    padding-right: 28px;
+    /* soft fade on the right edge = "there is more, swipe" */
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+  }
+  .toolbar::-webkit-scrollbar {
     display: none;
+  }
+  .group {
+    padding: 0 4px;
+  }
+  /* Surface the signature inserts (draw / voice / Sinhala) right after B-I-S. */
+  .toolbar > .group:nth-child(4) {
+    order: 2;
+  }
+  .toolbar > .group:nth-child(2) {
+    order: 4;
+  }
+  .toolbar > .group:nth-child(5) {
+    order: 5;
+  }
+  .progressWrap {
+    order: 6;
+  }
+  .button {
+    min-width: 40px;
+    height: 40px;
+    font-size: 0.85rem;
+  }
+  .progressWrap {
+    flex: none;
+    margin-left: 8px;
   }
 }
 
-@media (max-width: 640px) {
-  .group {
-    padding: 0 3px;
+@media (max-width: 519px) {
+  .text {
+    display: none;
   }
+  .labelled {
+    padding: 0 9px;
+  }
+}
+
+@media (max-height: 500px) {
   .button {
-    min-width: 24px;
-    height: 24px;
+    min-width: 34px;
+    height: 34px;
+  }
+  .toolbar {
+    padding-top: 2px;
+    padding-bottom: 2px;
+  }
+}
+
+/* Touch devices of any size (tablets): finger-sized buttons. */
+@media (pointer: coarse) {
+  .button {
+    min-width: 40px;
+    height: 40px;
+  }
+}
+
+@media (max-height: 420px) {
+  .button {
+    min-width: 34px;
+    height: 34px;
+  }
+  .toolbar {
+    padding-top: 0;
+    padding-bottom: 0;
   }
 }

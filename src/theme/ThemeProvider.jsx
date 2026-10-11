@@ -25,6 +25,15 @@ export function ThemeProvider({ children }) {
   // switch never needs to re-render the component tree.
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
+    // Tint the phone's browser chrome / status bar to match the theme.
+    const backdrop = getComputedStyle(document.documentElement).getPropertyValue('--backdrop').trim();
+    let meta = document.querySelector('meta[name="theme-color"]');
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.name = 'theme-color';
+      document.head.appendChild(meta);
+    }
+    if (backdrop) meta.setAttribute('content', backdrop);
   }, [theme]);
 
   return (

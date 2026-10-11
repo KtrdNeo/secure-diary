@@ -59,7 +59,8 @@
 
 .select {
   font-family: var(--font-ui);
-  font-size: 0.9rem;
+  font-size: max(16px, 0.9rem);
+  min-height: 44px;
   padding: 8px 10px;
   border-radius: 8px;
   border: 1px solid color-mix(in srgb, var(--ink-secondary) 40%, transparent);
@@ -70,7 +71,8 @@
 .button {
   font-family: var(--font-ui);
   font-size: 0.85rem;
-  padding: 9px 16px;
+  min-height: 44px;
+  padding: 0 18px;
   border: none;
   border-radius: 8px;
   background: var(--metal-base);

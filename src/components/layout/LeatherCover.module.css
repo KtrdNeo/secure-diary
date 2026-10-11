@@ -1,8 +1,10 @@
 .cover {
   position: relative;
-  width: min(900px, 100%);
-  height: min(560px, 78vh);
-  max-height: 700px;
+  width: min(1120px, 100%);
+  height: 100%;
+  max-height: 900px;
+  min-height: 0;
+  box-sizing: border-box;
   background-color: var(--cover-base);
   background-image:
     linear-gradient(135deg, var(--cover-highlight) 0%, transparent 45%),
@@ -33,11 +35,27 @@
   pointer-events: none;
 }
 
+/* Phones: the diary IS the screen - slim leather rim, no decorative stitching. */
 @media (max-width: 640px) {
   .cover {
-    height: min(520px, 82vh);
-    border-radius: calc(var(--radius-cover) * 0.7);
-    gap: 8px;
-    padding: 10px;
+    border-radius: 14px;
+    gap: 4px;
+    padding: 7px 7px 7px 5px;
+    box-shadow:
+      0 14px 30px -14px rgba(0, 0, 0, 0.55),
+      inset 0 2px 3px rgba(255, 255, 255, 0.16),
+      inset 0 -6px 12px rgba(0, 0, 0, 0.3);
+  }
+  .stitching {
+    inset: 4px;
+    border-width: 1px;
+    opacity: 0.35;
+  }
+}
+
+@media (max-height: 500px) {
+  .cover {
+    padding-top: 5px;
+    padding-bottom: 5px;
   }
 }

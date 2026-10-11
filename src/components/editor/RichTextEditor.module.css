@@ -9,15 +9,20 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* ---- base prose ---------------------------------------------------- */
 
 .prose {
-  height: 100%;
-  padding: clamp(16px, 3vw, 28px);
+  min-height: 100%;
+  box-sizing: border-box;
+  /* On very wide pages keep a readable measure instead of a 1000px line. */
+  padding: clamp(12px, 3vw, 28px) max(clamp(14px, 3vw, 28px), calc((100% - 46rem) / 2));
+  overflow-wrap: anywhere;
   font-family: var(--font-page);
-  font-size: 1.02rem;
+  font-size: clamp(1rem, 0.96rem + 0.2vw, 1.08rem);
   line-height: 1.7;
   color: var(--ink-primary);
   outline: none;
@@ -174,7 +179,7 @@
 }
 
 .prose div[data-callout][data-variant='warning'] {
-  border-left-color: #b3261e;
+  border-left-color: var(--danger, #b3261e);
   background: color-mix(in srgb, #b3261e 12%, transparent);
 }
 
@@ -207,4 +212,44 @@
   background: color-mix(in srgb, var(--ink-secondary) 12%, transparent);
   font-family: var(--font-ui);
   font-weight: 600;
+}
+
+/* Wide tables scroll inside themselves instead of widening the page. */
+.prose table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.prose img,
+.prose canvas,
+.prose svg {
+  max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  .prose {
+    line-height: 1.65;
+  }
+  .prose h1 {
+    font-size: 1.4rem;
+  }
+  .prose h2 {
+    font-size: 1.2rem;
+  }
+  .prose li[data-type='taskItem'] input[type='checkbox'] {
+    width: 20px;
+    height: 20px;
+  }
+  .prose li[data-radio-item] button[data-radio-control] {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.prose th,
+.prose td {
+  min-width: 6rem;
+  vertical-align: top;
 }

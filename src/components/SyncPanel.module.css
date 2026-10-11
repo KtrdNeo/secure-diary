@@ -93,7 +93,7 @@
 .error {
   font-family: var(--font-ui);
   font-size: 0.78rem;
-  color: #b3261e;
+  color: var(--danger, #b3261e);
   margin: 10px 0 0;
 }
 
@@ -132,4 +132,41 @@
   color: var(--ink-secondary);
   text-decoration: underline;
   cursor: pointer;
+}
+
+/* ---- phones: dialogs become bottom sheets (thumb reach, safe areas) ---- */
+@media (max-width: 640px) {
+  .overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .panel {
+    width: 100%;
+    max-width: none;
+    max-height: 92vh;
+    max-height: 92dvh;
+    border-radius: 18px 18px 0 0;
+    padding-bottom: calc(clamp(20px, 4vw, 30px) + env(safe-area-inset-bottom));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    box-sizing: border-box;
+  }
+}
+@media (max-height: 500px) {
+  .overlay {
+    align-items: center;
+    padding: 6px;
+  }
+  .panel {
+    max-height: 96vh;
+    max-height: 96dvh;
+    border-radius: 12px;
+  }
+}
+
+@media (max-width: 640px) {
+  .close {
+    width: 40px;
+    height: 40px;
+  }
 }

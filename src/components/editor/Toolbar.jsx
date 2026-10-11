@@ -56,7 +56,7 @@ export default function Toolbar({ editor, onRequestDrawing, onRequestVoiceNote, 
   const progressPct = showProgress ? Math.round((taskProgress.checked / taskProgress.total) * 100) : 0;
 
   return (
-    <div className={styles.toolbar}>
+    <div className={styles.toolbar} data-scrollrow role="toolbar" aria-label="Formatting">
       <div className={styles.group}>
         <ToolButton label="Bold" active={state.bold} onClick={() => editor.chain().focus().toggleBold().run()}>
           B

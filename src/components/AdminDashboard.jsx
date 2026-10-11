@@ -118,7 +118,7 @@ export default function AdminDashboard({ onClose }) {
           </button>
         </div>
 
-        <div className={styles.tabs}>
+        <div className={styles.tabs} data-scrollrow role="tablist">
           {[
             ['health', 'Health'],
             ['diagnose', 'Diagnose'],
@@ -178,8 +178,7 @@ export default function AdminDashboard({ onClose }) {
         {tab === 'diagnose' && (
           <div className={styles.section}>
             <p className={styles.hint}>
-              Rule-based checks against your real local data - not an AI model. See CHECKPOINT_SUMMARY.md
-              for why.
+              Rule-based checks run on your real local data, entirely on this device.
             </p>
             <div className={styles.topicList}>
               {DIAGNOSTIC_TOPICS.map((t) => (
@@ -266,7 +265,7 @@ export default function AdminDashboard({ onClose }) {
           <div className={styles.section}>
             <p className={styles.hint}>
               Exports plain text with a visible attribution watermark on every page. Non-Latin text (e.g.
-              Sinhala) isn&rsquo;t rendered correctly yet - see CHECKPOINT_SUMMARY.md.
+              Sinhala) can&rsquo;t be drawn in the PDF yet - use the text export for Sinhala entries.
             </p>
             <button type="button" className={styles.actionButton} onClick={handleExportAllPdf}>
               Export all entries to PDF

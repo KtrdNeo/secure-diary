@@ -34,8 +34,9 @@
 }
 
 .close {
-  width: 30px;
-  height: 30px;
+  flex: none;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: none;
   background: color-mix(in srgb, var(--ink-primary) 10%, transparent);
@@ -60,7 +61,9 @@
 .tab {
   font-family: var(--font-ui);
   font-size: 0.8rem;
-  padding: 6px 14px;
+  min-height: 40px;
+  padding: 0 16px;
+  flex: 0 0 auto;
   border-radius: 999px;
   border: none;
   background: transparent;
@@ -223,4 +226,41 @@
 
 .tab {
   flex-shrink: 0;
+}
+
+/* ---- phones: dialogs become bottom sheets (thumb reach, safe areas) ---- */
+@media (max-width: 640px) {
+  .overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .panel {
+    width: 100%;
+    max-width: none;
+    max-height: 92vh;
+    max-height: 92dvh;
+    border-radius: 18px 18px 0 0;
+    padding-bottom: calc(clamp(20px, 4vw, 30px) + env(safe-area-inset-bottom));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    box-sizing: border-box;
+  }
+}
+@media (max-height: 500px) {
+  .overlay {
+    align-items: center;
+    padding: 6px;
+  }
+  .panel {
+    max-height: 96vh;
+    max-height: 96dvh;
+    border-radius: 12px;
+  }
+}
+
+@media (max-width: 640px) {
+  .close {
+    width: 40px;
+    height: 40px;
+  }
 }

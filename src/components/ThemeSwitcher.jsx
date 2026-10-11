@@ -1,11 +1,11 @@
 import { useTheme } from '../theme/ThemeProvider.jsx';
 import styles from './ThemeSwitcher.module.css';
 
-export default function ThemeSwitcher() {
+export default function ThemeSwitcher({ variant = 'bar' }) {
   const { theme, setTheme, themes } = useTheme();
 
   return (
-    <fieldset className={styles.switcher}>
+    <fieldset className={`${styles.switcher} ${variant === 'menu' ? styles.inMenu : ''}`}>
       <legend className={styles.legend}>Theme</legend>
       <div className={styles.options}>
         {themes.map((t) => (

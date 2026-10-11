@@ -1,6 +1,6 @@
 .binder {
   flex: 0 0 auto;
-  width: clamp(28px, 5vw, 44px);
+  width: clamp(18px, 4vw, 44px);
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
@@ -32,4 +32,17 @@
   /* Approximates the leather behind the ring (see component comment). */
   background: var(--cover-shadow);
   box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.55);
+}
+
+@media (max-width: 380px) {
+  .binder {
+    width: 14px;
+  }
+}
+
+/* Few rings on short screens so they never touch. */
+@media (max-height: 640px) {
+  .ring:nth-child(even) {
+    display: none;
+  }
 }

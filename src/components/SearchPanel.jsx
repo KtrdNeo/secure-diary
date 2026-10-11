@@ -24,6 +24,7 @@ export default function SearchPanel({ onSelectEntry, onClose }) {
   return (
     <div className={styles.overlay} onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div className={styles.panel} role="dialog" aria-modal="true" aria-label="Search entries">
+        <div className={styles.bar}>
         <input
           ref={inputRef}
           type="search"
@@ -32,7 +33,12 @@ export default function SearchPanel({ onSelectEntry, onClose }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           disabled={!ready}
+          aria-label="Search your diary"
         />
+        <button type="button" className={styles.cancel} onClick={onClose}>
+          Close
+        </button>
+        </div>
 
         {query.trim() && results.length === 0 && (
           <p className={styles.empty}>No entries match &ldquo;{query}&rdquo;.</p>

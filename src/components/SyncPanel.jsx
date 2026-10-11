@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useSync } from '../sync/SyncProvider.jsx';
 import styles from './SyncPanel.module.css';
+import { useEscape } from '../hooks/useEscape.js';
 
 export default function SyncPanel({ onClose }) {
+  useEscape(onClose);
   const { configured, authLoading, user, signUp, signIn, signOut, sync, syncState, lastSyncedAt, lastError } =
     useSync();
   const [mode, setMode] = useState('signIn'); // 'signIn' | 'signUp'

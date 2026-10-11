@@ -114,7 +114,7 @@ export default function DrawingCanvas({ onSave, onCancel }) {
 
   return (
     <div className={styles.overlay}>
-      <div className={styles.panel}>
+      <div className={styles.panel} role="dialog" aria-modal="true" aria-label="Drawing">
         <div className={styles.toolbar}>
           <div className={styles.colors}>
             {PEN_COLORS.map((c) => (

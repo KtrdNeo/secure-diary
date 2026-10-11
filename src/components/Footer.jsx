@@ -1,39 +1,32 @@
-import { useState } from 'react';
-import LegalModal from './LegalModal.jsx';
-import SyncPanel from './SyncPanel.jsx';
-import AdminDashboard from './AdminDashboard.jsx';
-import HelpModal from './HelpModal.jsx';
 import { APP_CREDIT } from '../config/legal.js';
 import styles from './Footer.module.css';
 
-export default function Footer() {
-  const [legalOpen, setLegalOpen] = useState(false);
-  const [syncOpen, setSyncOpen] = useState(false);
-  const [adminOpen, setAdminOpen] = useState(false);
-  const [helpOpen, setHelpOpen] = useState(false);
-
+/**
+ * Credit line is always visible (Rule 01). The link buttons only show on wide
+ * screens; on small screens the same destinations live in the app bar's
+ * "More" menu so the footer stays a single quiet line.
+ */
+export default function Footer({ onOpenPanel }) {
   return (
     <footer className={styles.footer}>
       <p className={styles.credit}>{APP_CREDIT}</p>
-      <button type="button" className={styles.legalButton} onClick={() => setHelpOpen(true)}>
-        Help
-      </button>
-      <button type="button" className={styles.legalButton} onClick={() => setAdminOpen(true)}>
-        Admin
-      </button>
-      <button type="button" className={styles.legalButton} onClick={() => setSyncOpen(true)}>
-        Sync
-      </button>
-      <button type="button" className={styles.legalButton} onClick={() => setLegalOpen(true)}>
-        Legal &amp; About
-      </button>
-      <a href="/diagnostics.html" className={styles.legalButton} target="_blank" rel="noopener noreferrer">
-        Diagnostics
-      </a>
-      {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}
-      {legalOpen && <LegalModal onClose={() => setLegalOpen(false)} />}
-      {syncOpen && <SyncPanel onClose={() => setSyncOpen(false)} />}
-      {adminOpen && <AdminDashboard onClose={() => setAdminOpen(false)} />}
+      <div className={styles.links}>
+        <button type="button" className={styles.legalButton} onClick={() => onOpenPanel('help')}>
+          Help
+        </button>
+        <button type="button" className={styles.legalButton} onClick={() => onOpenPanel('admin')}>
+          Admin
+        </button>
+        <button type="button" className={styles.legalButton} onClick={() => onOpenPanel('sync')}>
+          Sync
+        </button>
+        <button type="button" className={styles.legalButton} onClick={() => onOpenPanel('legal')}>
+          Legal &amp; About
+        </button>
+        <a href="/diagnostics.html" className={styles.legalButton} target="_blank" rel="noopener noreferrer">
+          Diagnostics
+        </a>
+      </div>
     </footer>
   );
 }

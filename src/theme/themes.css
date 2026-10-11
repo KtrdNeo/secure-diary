@@ -23,7 +23,10 @@
   --metal-dark: #7d5c30;
   --ink-primary: #3b2a1a;
   --ink-secondary: #6b5842;
+  --ink-on-backdrop: #4a3826;
+  --danger: #b3261e;
   --backdrop: #d9cdb8;
+  color-scheme: light;
 }
 
 :root[data-theme='dark-obsidian'] {
@@ -37,7 +40,11 @@
   --metal-dark: #4d5566;
   --ink-primary: #e8e6ed;
   --ink-secondary: #9c98a8;
+  --ink-on-backdrop: #b4b0c0;
+  --danger: #ff8a80;
+  --paper-sheen: 0.03;
   --backdrop: #0c0b10;
+  color-scheme: dark;
 }
 
 :root[data-theme='sepia-vintage'] {
@@ -50,8 +57,12 @@
   --metal-base: #9c7c3e;
   --metal-dark: #6b5226;
   --ink-primary: #4a3323;
-  --ink-secondary: #7a6248;
+  --ink-secondary: #664d33;
+  --ink-on-backdrop: #43301f;
+  --danger: #a3211a;
+  --paper-sheen: 0.18;
   --backdrop: #cbb890;
+  color-scheme: light;
 }
 
 :root {

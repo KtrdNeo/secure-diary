@@ -38,6 +38,7 @@ export default function RichTextEditor({
   onRequestDrawing,
   onRequestVoiceNote,
   onRequestSinhala,
+  aboveContent = null,
 }) {
   // Recomputed only when the ydoc identity changes (i.e. a different
   // entry - DiaryShell remounts EntryEditor per entry anyway, but this
@@ -105,6 +106,7 @@ export default function RichTextEditor({
           onRequestSinhala={onRequestSinhala}
         />
       )}
+      {aboveContent}
       <EditorContent editor={editor} className={styles.editorContent} />
     </div>
   );

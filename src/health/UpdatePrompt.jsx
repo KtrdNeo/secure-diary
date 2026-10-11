@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import styles from './UpdatePrompt.module.css';
 
@@ -19,6 +20,13 @@ export default function UpdatePrompt() {
       console.error('Service worker registration failed:', error);
     },
   });
+
+  // The offline reassurance fades on its own; an update prompt waits for a choice.
+  useEffect(() => {
+    if (!offlineReady || needRefresh) return undefined;
+    const t = setTimeout(() => setOfflineReady(false), 6000);
+    return () => clearTimeout(t);
+  }, [offlineReady, needRefresh, setOfflineReady]);
 
   if (!offlineReady && !needRefresh) return null;
 

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { transliterate } from '../sinhala/transliterate.js';
 import { wijesekaraBaseChar } from '../sinhala/wijesekara.js';
 import styles from './SinhalaInputPanel.module.css';
+import { useEscape } from '../hooks/useEscape.js';
 
 /**
  * A focused composer, not an inline live-transliteration editor
@@ -13,6 +14,7 @@ import styles from './SinhalaInputPanel.module.css';
  * DrawingCanvas and VoiceRecorder already use successfully.
  */
 export default function SinhalaInputPanel({ onInsert, onClose }) {
+  useEscape(onClose);
   const [mode, setMode] = useState('transliterate');
   const [latinDraft, setLatinDraft] = useState('');
   const [wijesekaraDraft, setWijesekaraDraft] = useState('');
@@ -88,8 +90,8 @@ export default function SinhalaInputPanel({ onInsert, onClose }) {
         ) : (
           <>
             <p className={styles.hint}>
-              Type using the base Wijesekara key positions (a partial, unshifted-row-only
-              layout - see CHECKPOINT_SUMMARY.md for exactly what&rsquo;s covered).
+              Type using the Wijesekara key positions. This covers the base (unshifted) keys;
+              use phonetic typing for anything not covered.
             </p>
             <textarea
               ref={textareaRef}

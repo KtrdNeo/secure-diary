@@ -1,10 +1,11 @@
 .screen {
   min-height: 100vh;
   min-height: 100dvh;
+  box-sizing: border-box;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
+  /* margin:auto on the card (not align-items:center) keeps the top of the
+     card reachable when the on-screen keyboard shrinks the viewport. */
+  padding: max(20px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
   background: radial-gradient(
     ellipse at 50% 20%,
     color-mix(in srgb, var(--backdrop) 55%, white 12%) 0%,
@@ -29,7 +30,9 @@
 }
 
 .card {
+  margin: auto;
   width: min(400px, 100%);
+  box-sizing: border-box;
   background: var(--paper-base);
   color: var(--ink-primary);
   border-radius: 12px;
@@ -69,6 +72,8 @@
 .input {
   font-family: var(--font-ui);
   font-size: 1rem;
+  min-height: 46px;
+  box-sizing: border-box;
   padding: 10px 12px;
   border-radius: 6px;
   border: 1px solid color-mix(in srgb, var(--ink-secondary) 35%, transparent);
@@ -89,13 +94,14 @@
   font-size: 0.78rem;
   color: var(--ink-secondary);
   margin-top: 12px;
+  min-height: 36px;
   cursor: pointer;
 }
 
 .error {
   font-family: var(--font-ui);
   font-size: 0.8rem;
-  color: #b3261e;
+  color: var(--danger, #b3261e);
   margin: 14px 0 0;
 }
 
@@ -104,7 +110,8 @@
   font-family: var(--font-ui);
   font-weight: 600;
   font-size: 0.9rem;
-  padding: 11px;
+  min-height: 48px;
+  padding: 0 11px;
   border: none;
   border-radius: 999px;
   background: var(--cover-base);
@@ -129,4 +136,25 @@
 .submit:focus-visible {
   outline: 2px solid var(--metal-base);
   outline-offset: 2px;
+}
+
+/* Landscape phones: a tighter card so it scrolls as little as possible. */
+@media (max-height: 500px) {
+  .card {
+    padding: 16px 20px;
+  }
+  .title {
+    margin-bottom: 6px;
+    font-size: 1.15rem;
+  }
+  .warning {
+    margin-bottom: 8px;
+    padding: 6px 10px;
+  }
+  .label {
+    margin-top: 6px;
+  }
+  .submit {
+    margin-top: 12px;
+  }
 }

@@ -24,7 +24,10 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px 4px 4px;
+  padding: 4px;
+  min-width: 32px;
+  min-height: 32px;
+  justify-content: center;
   border-radius: 999px;
   cursor: pointer;
   transition: background-color 0.2s ease;
@@ -43,19 +46,27 @@
 }
 
 .swatch {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.25), 0 1px 3px rgba(0, 0, 0, 0.4);
   flex: 0 0 auto;
 }
 
 .label {
+  display: none;
   font-family: var(--font-ui);
   font-size: 0.72rem;
   color: #fff;
   opacity: 0.85;
   white-space: nowrap;
+}
+
+/* Bar variant: swatches only until there is room for names. */
+@media (min-width: 1280px) {
+  .label {
+    display: inline;
+  }
 }
 
 .input:checked ~ .swatch {
@@ -81,11 +92,32 @@
   background: linear-gradient(135deg, #7a3f35 0%, #5c2a27 52%, #e8d9b5 52%, #e8d9b5 100%);
 }
 
+/* Inside the mobile "More" menu: labels shown, bigger touch targets. */
+.inMenu {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 4px;
+  border-radius: 14px;
+}
+
+.inMenu .options {
+  flex-direction: column;
+  gap: 2px;
+}
+
+.inMenu .option {
+  min-height: 44px;
+  padding: 4px 12px 4px 8px;
+  border-radius: 10px;
+}
+
+.inMenu .label {
+  display: inline;
+  font-size: 0.88rem;
+}
+
 @media (max-width: 640px) {
-  .label {
-    display: none;
-  }
   .option {
-    padding: 4px;
+    min-height: 40px;
   }
 }

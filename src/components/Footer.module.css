@@ -1,28 +1,41 @@
 .footer {
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 8px 16px;
   flex-wrap: wrap;
-  padding: 14px 20px;
+  padding: 8px 16px calc(8px + env(safe-area-inset-bottom));
   font-family: var(--font-ui);
 }
 
 .credit {
   margin: 0;
-  font-size: 0.75rem;
-  color: var(--ink-secondary, #888);
-  opacity: 0.8;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--ink-on-backdrop, #4a3826);
+}
+
+.links {
+  display: none;
+  align-items: center;
+  gap: 8px;
 }
 
 .legalButton {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
   font-family: var(--font-ui);
   font-size: 0.75rem;
   background: none;
-  border: 1px solid color-mix(in srgb, var(--ink-secondary, #888) 40%, transparent);
-  color: var(--ink-secondary, #888);
-  padding: 4px 12px;
+  border: 1px solid color-mix(in srgb, var(--ink-on-backdrop, #4a3826) 45%, transparent);
+  color: var(--ink-on-backdrop, #4a3826);
+  padding: 0 12px;
   border-radius: 999px;
+  text-decoration: none;
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
@@ -34,4 +47,36 @@
 .legalButton:focus-visible {
   outline: 2px solid var(--metal-base, #888);
   outline-offset: 2px;
+}
+
+@media (min-width: 1024px) {
+  .links {
+    display: flex;
+  }
+}
+
+@media (max-width: 380px) {
+  .credit {
+    font-size: 0.66rem;
+  }
+}
+
+/* Landscape phones: keep the footer to a hair so the page gets the height. */
+@media (max-height: 500px) {
+  .footer {
+    padding-top: 2px;
+    padding-bottom: calc(2px + env(safe-area-inset-bottom));
+  }
+  .credit {
+    font-size: 0.62rem;
+  }
+}
+
+/* Very short viewports (landscape phone with large text, keyboard open): the
+   credit moves out of the way rather than costing the writing area ~40px. It
+   is always in Legal & About (More menu) and returns when height allows. */
+@media (max-height: 420px) {
+  .footer {
+    display: none;
+  }
 }

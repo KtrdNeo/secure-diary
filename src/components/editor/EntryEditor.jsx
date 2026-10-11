@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import RichTextEditor from './RichTextEditor.jsx';
 import DrawingCanvas from '../drawing/DrawingCanvas.jsx';
 import VoiceRecorder from '../voice/VoiceRecorder.jsx';
@@ -323,12 +324,6 @@ export default function EntryEditor({ entryId, onEntryCreated, onOpenHelp }) {
         </p>
       )}
 
-      {isBlankPage && !welcomeHidden && (
-        <WelcomeCard onPickTemplate={handlePickTemplate} onUsePrompt={handleUsePrompt} onOpenHelp={onOpenHelp}
-          onDismiss={() => setWelcomeHidden(true)}
-        />
-      )}
-
       <RichTextEditor
         ydoc={ydoc}
         onChange={() => setChangeTick((t) => t + 1)}
@@ -336,6 +331,13 @@ export default function EntryEditor({ entryId, onEntryCreated, onOpenHelp }) {
         onRequestDrawing={() => setOverlay('drawing')}
         onRequestVoiceNote={() => setOverlay('voice')}
         onRequestSinhala={() => setOverlay('sinhala')}
+        aboveContent={
+          isBlankPage && !welcomeHidden ? (
+                  <WelcomeCard onPickTemplate={handlePickTemplate} onUsePrompt={handleUsePrompt} onOpenHelp={onOpenHelp}
+                    onDismiss={() => setWelcomeHidden(true)}
+                  />
+                ) : null
+        }
       />
 
       <div className={styles.status}>
@@ -372,20 +374,46 @@ export default function EntryEditor({ entryId, onEntryCreated, onOpenHelp }) {
             </button>
           )}
         </span>
-        <span>
-          {wordCount > 0 && `${wordCount} word${wordCount === 1 ? '' : 's'} · ${readingMinutes(wordCount)} min read · `}
-          {saving ? 'Saving…' : savedAt ? `Saved ${new Date(savedAt).toLocaleTimeString()}` : ' '}
+        <span className={styles.meta}>
+          {wordCount > 0 && (
+            <span>
+              {wordCount} word{wordCount === 1 ? '' : 's'}
+              <span className={styles.readTime}> · {readingMinutes(wordCount)} min read</span>
+            </span>
+          )}
+          <span>
+            {saving ? (
+              'Saving…'
+            ) : savedAt ? (
+              <>
+                <span aria-hidden="true">✓</span>
+                <span className={styles.savedWord}> Saved</span>{' '}
+                {new Date(savedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+              </>
+            ) : (
+              ''
+            )}
+          </span>
         </span>
       </div>
 
-      {overlay === 'drawing' && <DrawingCanvas onSave={handleDrawingSave} onCancel={() => setOverlay(null)} />}
-      {overlay === 'voice' && <VoiceRecorder onSave={handleVoiceSave} onCancel={() => setOverlay(null)} />}
-      {overlay === 'sinhala' && (
-        <SinhalaInputPanel onInsert={handleSinhalaInsert} onClose={() => setOverlay(null)} />
-      )}
-      {overlay === 'history' && (
-        <VersionHistory entryId={currentEntryIdRef.current} onClose={() => setOverlay(null)} />
-      )}
+      {/* Portalled to <body>: the page-flip container uses CSS perspective, which would
+          otherwise trap these position:fixed dialogs inside the page (wrong size, and
+          hidden under the app bar). */}
+      {overlay &&
+        createPortal(
+          <>
+        {overlay === 'drawing' && <DrawingCanvas onSave={handleDrawingSave} onCancel={() => setOverlay(null)} />}
+        {overlay === 'voice' && <VoiceRecorder onSave={handleVoiceSave} onCancel={() => setOverlay(null)} />}
+        {overlay === 'sinhala' && (
+          <SinhalaInputPanel onInsert={handleSinhalaInsert} onClose={() => setOverlay(null)} />
+        )}
+        {overlay === 'history' && (
+          <VersionHistory entryId={currentEntryIdRef.current} onClose={() => setOverlay(null)} />
+        )}
+          </>,
+          document.body
+        )}
     </div>
   );
 }

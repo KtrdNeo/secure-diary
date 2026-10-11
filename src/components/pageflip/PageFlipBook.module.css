@@ -1,7 +1,16 @@
+.book {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .perspective {
   position: relative;
   flex: 1 1 auto;
-  min-width: 0;
+  min-height: 0;
   perspective: 1800px;
 }
 
@@ -20,21 +29,80 @@
   box-shadow: 10px 0 30px rgba(0, 0, 0, 0.35);
 }
 
+.pageNav {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 40px;
+}
+
 .pageIndicator {
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
+  min-width: 96px;
+  text-align: center;
   font-family: var(--font-ui);
-  font-size: 0.7rem;
+  font-size: 0.74rem;
   letter-spacing: 0.03em;
-  color: var(--ink-secondary);
-  opacity: 0.75;
-  pointer-events: none;
+  color: #fff;
+  opacity: 0.85;
+  font-variant-numeric: tabular-nums;
+}
+
+.navButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 36px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.navButton:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.26);
+}
+
+.navButton:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+.navButton:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.navButton:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+@media (max-height: 500px) {
+  .pageNav {
+    min-height: 32px;
+  }
+  .navButton {
+    height: 30px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .flipLayer {
     transition-duration: 0.01s;
+  }
+}
+
+@media (max-height: 420px) {
+  .pageNav {
+    min-height: 32px;
+    gap: 10px;
+  }
+  .navButton {
+    height: 32px;
+    width: 40px;
   }
 }

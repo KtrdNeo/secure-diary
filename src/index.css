@@ -11,3 +11,56 @@ body {
   background: var(--backdrop);
   font-family: var(--font-ui);
 }
+
+/* ---- global responsive foundations ------------------------------------- */
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+a,
+select,
+label {
+  touch-action: manipulation; /* no 300ms tap delay / double-tap zoom on controls */
+}
+
+button {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+img,
+svg,
+canvas,
+video {
+  max-width: 100%;
+}
+
+/* Inputs at 16px+ on phones: smaller sizes make iOS Safari zoom the page on focus. */
+@media (max-width: 899px) {
+  :where(input:not([type='checkbox']):not([type='radio']):not([type='range']), textarea, select) {
+    font-size: max(16px, 1em);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+}

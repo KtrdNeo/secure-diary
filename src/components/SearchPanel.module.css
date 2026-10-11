@@ -7,6 +7,8 @@
   align-items: flex-start;
   justify-content: center;
   padding-top: clamp(60px, 12vh, 140px);
+  padding-left: 8px;
+  padding-right: 8px;
   z-index: 100;
 }
 
@@ -19,7 +21,40 @@
   overflow: hidden;
 }
 
+.bar {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink-secondary) 20%, transparent);
+}
+
+.cancel {
+  flex: none;
+  min-height: 44px;
+  margin-right: 8px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink-secondary) 16%, transparent);
+  color: var(--ink-primary);
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.cancel:focus-visible {
+  outline: 2px solid var(--metal-base);
+  outline-offset: 2px;
+}
+
+.input::-webkit-search-cancel-button,
+.input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 .input {
+  flex: 1 1 auto;
+  min-width: 0;
   width: 100%;
   box-sizing: border-box;
   border: none;
@@ -29,12 +64,11 @@
   padding: 18px 20px;
   color: var(--ink-primary);
   outline: none;
-  border-bottom: 1px solid color-mix(in srgb, var(--ink-secondary) 20%, transparent);
 }
 
 .input::placeholder {
   color: var(--ink-secondary);
-  opacity: 0.6;
+  opacity: 0.85;
 }
 
 .empty {
@@ -49,7 +83,8 @@
   list-style: none;
   margin: 0;
   padding: 6px;
-  max-height: 50vh;
+  max-height: min(50vh, 50dvh);
+  overscroll-behavior: contain;
   overflow-y: auto;
 }
 
@@ -63,6 +98,8 @@
   background: none;
   border: none;
   font-family: var(--font-ui);
+  min-height: 48px;
+  align-items: center;
   padding: 10px 12px;
   border-radius: 6px;
   cursor: pointer;
@@ -89,4 +126,20 @@
   font-size: 0.72rem;
   color: var(--ink-secondary);
   flex: 0 0 auto;
+}
+
+@media (max-width: 640px) {
+  .overlay {
+    padding: calc(env(safe-area-inset-top) + 8px) 8px 8px;
+  }
+  .panel {
+    width: 100%;
+    max-height: calc(100dvh - 24px);
+    display: flex;
+    flex-direction: column;
+  }
+  .input {
+    font-size: 1rem; /* >=16px: no iOS zoom */
+    padding: 16px;
+  }
 }
