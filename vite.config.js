@@ -4,6 +4,11 @@ import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  build: {
+    // Admin (PDF export) is lazy-loaded; the main chunk is the editor stack
+    // (Tiptap/ProseMirror/Yjs) which the app can't open without.
+    chunkSizeWarningLimit: 900,
+  },
   plugins: [
     react(),
     tailwindcss(),

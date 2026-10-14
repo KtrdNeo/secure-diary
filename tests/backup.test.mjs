@@ -115,3 +115,38 @@ test('importBackup in "replace" mode overwrites an existing record at the same i
   const titleData = await decryptData(replaced.titlePayload, key);
   assert.equal(titleData.title, 'Backup me');
 });
+
+test('backup carries the passphrase salt+verifier so it restores on a fresh device and still decrypts', async () => {
+  const { createVerifier, verifyPassphrase } = await import('../src/utils/crypto.js');
+  const salt = generateSalt();
+  const key = await deriveKeyFromPassphrase('fresh-device', salt);
+  await db.settings.put({ key: 'passphraseSetup', value: { salt, verifier: await createVerifier(key) } });
+  await seedOneEntry(key);
+
+  const file = JSON.stringify(await exportBackup(db));
+
+  await Dexie.delete('SecureDiaryDB');
+  await db.open();
+  const result = await importBackup(db, JSON.parse(file));
+  assert.equal(result.setup, 'restored');
+
+  const rec = await db.settings.get('passphraseSetup');
+  const key2 = await deriveKeyFromPassphrase('fresh-device', rec.value.salt);
+  assert.equal(await verifyPassphrase(key2, rec.value.verifier), true);
+  const entry = (await db.entries.toArray())[0];
+  assert.equal((await decryptData(entry.titlePayload, key2)).title, 'Backup me');
+});
+
+test('importBackup refuses a backup with a different salt when this diary already has entries', async () => {
+  const { createVerifier } = await import('../src/utils/crypto.js');
+  const saltA = generateSalt();
+  const keyA = await deriveKeyFromPassphrase('aaaa-aaaa', saltA);
+  await db.settings.put({ key: 'passphraseSetup', value: { salt: saltA, verifier: await createVerifier(keyA) } });
+  await seedOneEntry(keyA);
+  const backup = JSON.parse(JSON.stringify(await exportBackup(db)));
+
+  const saltB = generateSalt();
+  const keyB = await deriveKeyFromPassphrase('bbbb-bbbb', saltB);
+  await db.settings.put({ key: 'passphraseSetup', value: { salt: saltB, verifier: await createVerifier(keyB) } });
+  await assert.rejects(() => importBackup(db, backup, { mode: 'replace' }), /different passphrase/);
+});

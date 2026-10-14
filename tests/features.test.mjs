@@ -83,3 +83,12 @@ test('templates: unique ids/titles, unknown id', () => {
     assert.ok(b.doc.content.length > 0);
   }
 });
+
+test('unlock throttle: free for 2 failures, then escalating, capped at 30s', async () => {
+  const { throttleDelayMs } = await import('../src/features/unlockThrottle.js');
+  assert.equal(throttleDelayMs(1), 0);
+  assert.equal(throttleDelayMs(2), 0);
+  assert.equal(throttleDelayMs(3), 2000);
+  assert.equal(throttleDelayMs(4), 4000);
+  assert.equal(throttleDelayMs(20), 30000);
+});

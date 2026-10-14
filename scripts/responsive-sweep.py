@@ -41,7 +41,7 @@ with sync_playwright() as p:
         pg.evaluate(f"document.documentElement.style.fontSize = '{fs}%'")
         for w in WIDTHS:
             for h in HEIGHTS:
-                pg.set_viewport_size({'width': w, 'height': h}); time.sleep(.04)
+                pg.set_viewport_size({'width': w, 'height': h}); time.sleep(.15)
                 iss = pg.evaluate(JS); n += 1
                 if iss: bad[f'{w}x{h}@{fs}%'] = iss
     b.close()
