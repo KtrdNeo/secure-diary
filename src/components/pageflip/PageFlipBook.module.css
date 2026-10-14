@@ -12,6 +12,7 @@
   flex: 1 1 auto;
   min-height: 0;
   perspective: 1800px;
+  touch-action: pan-y pinch-zoom; /* horizontal swipes turn the page */
 }
 
 .staticLayer {

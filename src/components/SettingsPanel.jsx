@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import Modal from './Modal.jsx';
+import ChangePassphrase from './ChangePassphrase.jsx';
 import { db } from '../db/schema.js';
 import {
   AUTO_LOCK_OPTIONS,
@@ -49,6 +50,9 @@ export default function SettingsPanel({ onClose, onLockNow }) {
           Lock now
         </button>
       </div>
+      <hr className={styles.divider} />
+      <ChangePassphrase onDone={onLockNow} />
+      <hr className={styles.divider} />
       <p className={styles.note}>Theme: use the switcher at the top right of the diary.</p>
     </Modal>
   );

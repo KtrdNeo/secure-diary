@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { db } from '../db/schema.js';
 import {
   generateSalt,
@@ -7,6 +7,8 @@ import {
   verifyPassphrase,
 } from '../utils/crypto.js';
 import { useSessionKey } from '../session/SessionKeyProvider.jsx';
+import { importBackup } from '../health/backup.js';
+import { throttleDelayMs } from '../features/unlockThrottle.js';
 import styles from './PassphraseGate.module.css';
 
 const MIN_LENGTH = 8;
@@ -41,6 +43,17 @@ export default function PassphraseGate({ children }) {
   const [showPassphrase, setShowPassphrase] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [notice, setNotice] = useState('');
+  const [failures, setFailures] = useState(0);
+  const [waitUntil, setWaitUntil] = useState(0);
+  const [now, setNow] = useState(Date.now());
+  const fileRef = useRef(null);
+
+  useEffect(() => {
+    if (waitUntil <= Date.now()) return undefined;
+    const t = setInterval(() => setNow(Date.now()), 250);
+    return () => clearInterval(t);
+  }, [waitUntil]);
 
   useEffect(() => {
     let cancelled = false;
@@ -67,6 +80,7 @@ export default function PassphraseGate({ children }) {
       setConfirmPassphrase('');
       setShowPassphrase(false);
       setError('');
+      setNotice('');
       setBusy(false);
     }
   }, [cryptoKey]);
@@ -76,6 +90,7 @@ export default function PassphraseGate({ children }) {
   const isLoading = setupRecord === undefined && !loadError;
   const isFirstRun = setupRecord === null;
   const inputType = showPassphrase ? 'text' : 'password';
+  const waitSeconds = Math.max(0, Math.ceil((waitUntil - now) / 1000));
 
   async function handleCreate(e) {
     e.preventDefault();
@@ -115,8 +130,36 @@ export default function PassphraseGate({ children }) {
     }
   }
 
+  async function handleRestoreFile(e) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setError('');
+    setNotice('');
+    setBusy(true);
+    try {
+      const parsed = JSON.parse(await file.text());
+      if (!parsed?.passphraseSetup?.salt) {
+        throw new Error(
+          'This backup is from an older version and has no passphrase info, so it can only be restored on the device it came from.'
+        );
+      }
+      const result = await importBackup(db, parsed, { mode: 'skip' });
+      const rec = await db.settings.get('passphraseSetup');
+      if (rec) setSetupRecord(rec);
+      setNotice(
+        `Restored ${result.entries} entr${result.entries === 1 ? 'y' : 'ies'}. Enter the passphrase you used when the backup was made.`
+      );
+    } catch (err) {
+      setError(`Restore failed: ${err.message}`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function handleUnlock(e) {
     e.preventDefault();
+    if (waitUntil > Date.now()) return;
     setError('');
     setBusy(true);
     try {
@@ -124,10 +167,18 @@ export default function PassphraseGate({ children }) {
       const key = await deriveKeyFromPassphrase(passphrase, salt);
       const ok = await verifyPassphrase(key, verifier);
       if (!ok) {
+        const n = failures + 1;
+        setFailures(n);
+        const delay = throttleDelayMs(n);
+        if (delay > 0) {
+          setNow(Date.now());
+          setWaitUntil(Date.now() + delay);
+        }
         setError('Incorrect passphrase.');
         setBusy(false);
         return;
       }
+      setFailures(0);
       setCryptoKey(key);
     } catch {
       setError('Something went wrong unlocking. Please try again.');
@@ -169,16 +220,19 @@ export default function PassphraseGate({ children }) {
         className={styles.card}
         onSubmit={isFirstRun ? handleCreate : handleUnlock}
       >
-        <h1 className={styles.title}>{isFirstRun ? 'Set your passphrase' : 'Unlock your diary'}</h1>
+        <div className={styles.intro}>
+          <h1 className={styles.title}>{isFirstRun ? 'Set your passphrase' : 'Unlock your diary'}</h1>
 
-        {isFirstRun && (
-          <p className={styles.warning}>
-            This passphrase encrypts everything you write. It is never stored anywhere,
-            not even here - if you forget it, your entries cannot be recovered by
-            anyone, including the developer.
-          </p>
-        )}
+          {isFirstRun && (
+            <p className={styles.warning}>
+              This passphrase encrypts everything you write. It is never stored anywhere,
+              not even here - if you forget it, your entries cannot be recovered by
+              anyone, including the developer.
+            </p>
+          )}
+        </div>
 
+        <div className={styles.fields}>
         <label className={styles.label} htmlFor="passphrase">
           Passphrase
         </label>
@@ -222,10 +276,30 @@ export default function PassphraseGate({ children }) {
             {error}
           </p>
         )}
+        {notice && (
+          <p className={styles.notice} role="status">
+            {notice}
+          </p>
+        )}
+        {waitSeconds > 0 && (
+          <p className={styles.error} role="status">
+            Too many attempts - try again in {waitSeconds}s.
+          </p>
+        )}
 
-        <button type="submit" className={styles.submit} disabled={busy}>
+        <button type="submit" className={styles.submit} disabled={busy || waitSeconds > 0}>
           {busy ? 'Please wait…' : isFirstRun ? 'Create & unlock' : 'Unlock'}
         </button>
+
+        {isFirstRun && (
+          <>
+            <button type="button" className={styles.linkButton} onClick={() => fileRef.current?.click()} disabled={busy}>
+              Already have a backup? Restore it
+            </button>
+            <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={handleRestoreFile} />
+          </>
+        )}
+        </div>
       </form>
     </div>
   );

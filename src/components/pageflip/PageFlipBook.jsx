@@ -89,13 +89,44 @@ export default function PageFlipBook({ pages, fill = false, jumpToIndex = null, 
     setFlip(null);
   };
 
+  // Touch swipe to turn the page: a deliberate, mostly-horizontal drag that
+  // doesn't start on something that scrolls or edits sideways (tables, the
+  // toolbar/chip rows, inputs, canvases) and isn't a text selection.
+  const swipeRef = useRef(null);
+  const SWIPE_IGNORE = '[data-scrollrow], table, input, textarea, button, canvas, select, [role="dialog"]';
+  const handlePointerDown = (e) => {
+    if (e.pointerType !== 'touch' || !e.isPrimary || e.target.closest?.(SWIPE_IGNORE)) {
+      swipeRef.current = null;
+      return;
+    }
+    swipeRef.current = { x: e.clientX, y: e.clientY, t: Date.now() };
+  };
+  const handlePointerUp = (e) => {
+    const start = swipeRef.current;
+    swipeRef.current = null;
+    if (!start || e.pointerType !== 'touch') return;
+    const dx = e.clientX - start.x;
+    const dy = e.clientY - start.y;
+    if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 2 || Date.now() - start.t > 800) return;
+    if (window.getSelection?.()?.toString()) return;
+    if (dx < 0) goNext();
+    else goPrev();
+  };
+
   const rotation = !flip ? 0 : flip.direction === 'forward'
     ? (flip.animate ? -179 : 0)
     : (flip.animate ? 0 : -179);
 
   return (
     <div className={styles.book}>
-      <div className={styles.perspective}>
+      <div
+        className={styles.perspective}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={() => {
+          swipeRef.current = null;
+        }}
+      >
         <div className={styles.staticLayer}>
           <PaperSurface
             onNextCorner={goNext}

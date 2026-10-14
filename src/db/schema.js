@@ -66,6 +66,13 @@ db.version(2).stores({
   entryVersions: '++id, entryId, createdAt',
 });
 
+// Version 3: compound index so sync-queue de-duplication
+// (`where({ entityType, entityId })`) is an index lookup, not a scan.
+// Index-only change: existing rows carry forward untouched.
+db.version(3).stores({
+  syncQueue: '++id, entityType, entityId, operation, createdAt, attempts, [entityType+entityId]',
+});
+
 /**
  * Convenience flag constants, since IndexedDB indexes need 0/1 rather
  * than true/false (see note above).

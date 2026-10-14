@@ -8,13 +8,14 @@ import { exportEntriesToPdf } from '../health/pdfExport.js';
 import { decryptData, decryptBinary } from '../utils/crypto.js';
 import { decodeYDoc, yDocToPlainText } from './editor/yjsUtils.js';
 import { downloadBytes } from '../features/download.js';
-import { countDeleted, restoreDeletedEntries } from '../features/trash.js';
+import { printEntries } from '../features/printEntries.js';
+import { countDeleted, restoreDeletedEntries, purgeDeletedEntries } from '../features/trash.js';
 import styles from './AdminDashboard.module.css';
 
 const downloadBlob = downloadBytes;
 
 export default function AdminDashboard({ onClose }) {
-  const { cryptoKey } = useSessionKey();
+  const { cryptoKey, lock } = useSessionKey();
   const [tab, setTab] = useState('health');
   const [report, setReport] = useState(null);
   const [loadingReport, setLoadingReport] = useState(false);
@@ -22,6 +23,7 @@ export default function AdminDashboard({ onClose }) {
   const [statusMessage, setStatusMessage] = useState('');
   const fileInputRef = useRef(null);
   const [trashCount, setTrashCount] = useState(null);
+  const [confirmPurge, setConfirmPurge] = useState(false);
 
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && onClose();
@@ -44,6 +46,13 @@ export default function AdminDashboard({ onClose }) {
     const n = await restoreDeletedEntries(db);
     setTrashCount(0);
     setStatusMessage(n ? `Restored ${n} entr${n === 1 ? 'y' : 'ies'}.` : 'Trash is empty.');
+  }
+
+  async function handlePurgeTrash() {
+    const n = await purgeDeletedEntries(db);
+    setTrashCount(0);
+    setConfirmPurge(false);
+    setStatusMessage(n ? `Permanently deleted ${n} entr${n === 1 ? 'y' : 'ies'}.` : 'Trash is empty.');
   }
 
   const refreshReport = useCallback(async () => {
@@ -74,8 +83,10 @@ export default function AdminDashboard({ onClose }) {
       const parsed = JSON.parse(text);
       const result = await importBackup(db, parsed, { mode: 'skip' });
       setStatusMessage(
-        `Restored ${result.entries} entr${result.entries === 1 ? 'y' : 'ies'}, ${result.attachments} attachment(s). ${result.skipped} already existed and were left as-is.`
+        `Restored ${result.entries} entr${result.entries === 1 ? 'y' : 'ies'}, ${result.attachments} attachment(s). ${result.skipped} already existed and were left as-is.` +
+          (result.setup === 'replaced' ? ' Locking - unlock with the passphrase the backup was made with.' : '')
       );
+      if (result.setup === 'replaced') setTimeout(lock, 1800);
     } catch (err) {
       setStatusMessage(`Import failed: ${err.message}`);
     } finally {
@@ -83,9 +94,7 @@ export default function AdminDashboard({ onClose }) {
     }
   }
 
-  async function handleExportAllPdf() {
-    if (!cryptoKey) return;
-    setStatusMessage('Preparing PDF\u2026');
+  async function loadDecryptedEntries() {
     const entries = await db.entries.where('isDeleted').equals(0).toArray();
     const decrypted = [];
     for (const entry of entries) {
@@ -101,9 +110,24 @@ export default function AdminDashboard({ onClose }) {
         decrypted.push({ title: '[unreadable entry]', bodyText: '', createdAt: entry.createdAt });
       }
     }
+    return decrypted;
+  }
+
+  async function handleExportAllPdf() {
+    if (!cryptoKey) return;
+    setStatusMessage('Preparing PDF\u2026');
+    const decrypted = await loadDecryptedEntries();
     const pdfBytes = await exportEntriesToPdf(decrypted);
     downloadBlob(pdfBytes, `secure-diary-export-${new Date().toISOString().slice(0, 10)}.pdf`, 'application/pdf');
     setStatusMessage(`Exported ${decrypted.length} entries to PDF.`);
+  }
+
+  async function handlePrintAll() {
+    if (!cryptoKey) return;
+    setStatusMessage('Preparing print view\u2026');
+    const decrypted = await loadDecryptedEntries();
+    await printEntries(decrypted);
+    setStatusMessage('Print dialog opened - choose "Save as PDF" to keep a copy.');
   }
 
   const diagnosis = topic && report ? diagnoseTopic(topic, report) : null;
@@ -236,6 +260,25 @@ export default function AdminDashboard({ onClose }) {
             >
               Restore all
             </button>
+            {!confirmPurge ? (
+              <button type="button" className={styles.actionButton} onClick={() => setConfirmPurge(true)} disabled={!trashCount}>
+                Delete forever&hellip;
+              </button>
+            ) : (
+              <>
+                <p className={styles.hint}>
+                  This permanently erases {trashCount} entr{trashCount === 1 ? 'y' : 'ies'} (with drawings,
+                  recordings and history) from this device. It can&rsquo;t be undone, and copies already synced
+                  to the cloud are not removed.
+                </p>
+                <button type="button" className={styles.actionButton} onClick={handlePurgeTrash}>
+                  Yes, delete forever
+                </button>
+                <button type="button" className={styles.actionButton} onClick={() => setConfirmPurge(false)}>
+                  Cancel
+                </button>
+              </>
+            )}
           </div>
         )}
 
@@ -264,11 +307,14 @@ export default function AdminDashboard({ onClose }) {
         {tab === 'export' && (
           <div className={styles.section}>
             <p className={styles.hint}>
-              Exports plain text with a visible attribution watermark on every page. Non-Latin text (e.g.
-              Sinhala) can&rsquo;t be drawn in the PDF yet - use the text export for Sinhala entries.
+              Quick PDF is Latin text only. For Sinhala (or any other script) use Print / Save as PDF -
+              your browser draws the text correctly. Both add the attribution line on every page.
             </p>
             <button type="button" className={styles.actionButton} onClick={handleExportAllPdf}>
-              Export all entries to PDF
+              Quick PDF (Latin text)
+            </button>
+            <button type="button" className={styles.actionButton} onClick={handlePrintAll}>
+              Print / Save as PDF (Sinhala-ready)
             </button>
           </div>
         )}

@@ -27,6 +27,11 @@
   font-family: var(--font-ui);
 }
 
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
 .slot {
   display: flex;
   justify-content: center;

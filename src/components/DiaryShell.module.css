@@ -1,6 +1,9 @@
 .app {
   height: 100vh;
   height: 100dvh;
+  height: var(--app-h, 100dvh);
+  position: relative;
+  top: var(--app-top, 0px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -137,13 +140,19 @@
   }
 }
 
-@media (min-width: 1024px) {
+/* Full desktop chrome needs both width and height; wide-but-short windows
+   (landscape tablets, big text) fall back to the compact "More" menu so
+   Stats/Help/Settings/Admin/Legal stay reachable. Keep in sync with Footer. */
+@media (min-width: 1024px) and (min-height: 641px) {
   .desktopOnly {
     display: inline-flex;
   }
   .mobileOnly {
     display: none;
   }
+}
+
+@media (min-width: 1024px) {
   .pill {
     min-height: 40px;
   }

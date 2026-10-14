@@ -47,3 +47,12 @@ function base64ToBuffer(base64) {
   }
   return bytes.buffer;
 }
+
+/** Raw bytes <-> base64 (used for the non-secret key-derivation salt in backups). */
+export function bytesToBase64(bytes) {
+  return bufferToBase64(bytes);
+}
+
+export function base64ToBytes(base64) {
+  return new Uint8Array(base64ToBuffer(base64));
+}

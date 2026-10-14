@@ -90,3 +90,49 @@
   outline: 2px solid var(--ink-primary);
   outline-offset: 2px;
 }
+
+.input {
+  font-family: var(--font-ui);
+  font-size: max(16px, 0.9rem);
+  min-height: 44px;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--ink-secondary) 40%, transparent);
+  background: color-mix(in srgb, white 40%, var(--paper-base));
+  color: var(--ink-primary);
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid color-mix(in srgb, var(--ink-secondary) 25%, transparent);
+  margin: 20px 0;
+}
+
+.errorText {
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  color: var(--danger, #b3261e);
+  margin: 0 0 12px;
+}
+
+.okText {
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  color: var(--ink-primary);
+  margin: 0 0 12px;
+}
+
+.dangerButton {
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 8px;
+  border: 1px solid var(--danger, #b3261e);
+  background: transparent;
+  color: var(--danger, #b3261e);
+  font-weight: 600;
+  cursor: pointer;
+}

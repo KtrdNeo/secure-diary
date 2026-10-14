@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useCallback, useMemo, lazy, Suspense } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import LeatherCover from './layout/LeatherCover.jsx';
 import RingBinder from './layout/RingBinder.jsx';
@@ -8,12 +8,12 @@ import ErrorBoundary from '../health/ErrorBoundary.jsx';
 import ThemeSwitcher from './ThemeSwitcher.jsx';
 import SearchPanel from './SearchPanel.jsx';
 import Footer from './Footer.jsx';
-import HelpModal from './HelpModal.jsx';
-import StatsPanel from './StatsPanel.jsx';
-import SettingsPanel from './SettingsPanel.jsx';
-import AdminDashboard from './AdminDashboard.jsx';
-import SyncPanel from './SyncPanel.jsx';
-import LegalModal from './LegalModal.jsx';
+const HelpModal = lazy(() => import('./HelpModal.jsx'));
+const StatsPanel = lazy(() => import('./StatsPanel.jsx'));
+const SettingsPanel = lazy(() => import('./SettingsPanel.jsx'));
+const AdminDashboard = lazy(() => import('./AdminDashboard.jsx'));
+const SyncPanel = lazy(() => import('./SyncPanel.jsx'));
+const LegalModal = lazy(() => import('./LegalModal.jsx'));
 import OverflowMenu from './OverflowMenu.jsx';
 import { PlusIcon, SearchIcon, LockIcon } from './icons.jsx';
 import { useLock } from '../hooks/useLock.js';
@@ -144,6 +144,7 @@ export default function DiaryShell() {
 
       <Footer onOpenPanel={setPanel} />
 
+      <Suspense fallback={null}>
       {panel === 'help' && <HelpModal onClose={closePanel} />}
       {panel === 'stats' && <StatsPanel onClose={closePanel} />}
       {panel === 'settings' && (
@@ -158,6 +159,7 @@ export default function DiaryShell() {
       {panel === 'admin' && <AdminDashboard onClose={closePanel} />}
       {panel === 'sync' && <SyncPanel onClose={closePanel} />}
       {panel === 'legal' && <LegalModal onClose={closePanel} />}
+      </Suspense>
       {searchOpen && (
         <SearchPanel onSelectEntry={handleSelectSearchResult} onClose={() => setSearchOpen(false)} />
       )}

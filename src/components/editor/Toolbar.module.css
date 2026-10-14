@@ -97,7 +97,7 @@
 
 /* Phones and small tablets: ONE swipeable row instead of a wrapping block that
    eats half the page. Big touch targets; labels shown from 520px up. */
-@media (max-width: 699px), (max-height: 500px) {
+@media (max-width: 699px), (max-height: 620px) {
   .toolbar {
     flex-wrap: nowrap;
     overflow-x: auto;

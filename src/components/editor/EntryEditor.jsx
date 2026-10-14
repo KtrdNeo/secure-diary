@@ -1,10 +1,10 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, lazy, Suspense } from 'react';
 import { createPortal } from 'react-dom';
 import RichTextEditor from './RichTextEditor.jsx';
-import DrawingCanvas from '../drawing/DrawingCanvas.jsx';
-import VoiceRecorder from '../voice/VoiceRecorder.jsx';
-import VersionHistory from './VersionHistory.jsx';
-import SinhalaInputPanel from '../SinhalaInputPanel.jsx';
+const DrawingCanvas = lazy(() => import('../drawing/DrawingCanvas.jsx'));
+const VoiceRecorder = lazy(() => import('../voice/VoiceRecorder.jsx'));
+const VersionHistory = lazy(() => import('./VersionHistory.jsx'));
+const SinhalaInputPanel = lazy(() => import('../SinhalaInputPanel.jsx'));
 import WelcomeCard from './WelcomeCard.jsx';
 import { buildTemplate } from '../../features/templates.js';
 import { enqueueSync } from '../../features/syncQueue.js';
@@ -402,7 +402,7 @@ export default function EntryEditor({ entryId, onEntryCreated, onOpenHelp }) {
           hidden under the app bar). */}
       {overlay &&
         createPortal(
-          <>
+          <Suspense fallback={null}>
         {overlay === 'drawing' && <DrawingCanvas onSave={handleDrawingSave} onCancel={() => setOverlay(null)} />}
         {overlay === 'voice' && <VoiceRecorder onSave={handleVoiceSave} onCancel={() => setOverlay(null)} />}
         {overlay === 'sinhala' && (
@@ -411,7 +411,7 @@ export default function EntryEditor({ entryId, onEntryCreated, onOpenHelp }) {
         {overlay === 'history' && (
           <VersionHistory entryId={currentEntryIdRef.current} onClose={() => setOverlay(null)} />
         )}
-          </>,
+          </Suspense>,
           document.body
         )}
     </div>

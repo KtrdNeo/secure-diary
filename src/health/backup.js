@@ -13,9 +13,17 @@
  * through encryptBinary) get the same base64 wire conversion the sync
  * engine uses, for the same reason: JSON can't carry raw ArrayBuffers.
  */
-import { binaryPayloadToWire, wirePayloadToBinary } from '../sync/payloadCodec.js';
+import { binaryPayloadToWire, wirePayloadToBinary, bytesToBase64, base64ToBytes } from '../sync/payloadCodec.js';
 
-const BACKUP_VERSION = 1;
+// v2 adds `passphraseSetup` (the non-secret salt + encrypted verifier) so a
+// backup can be restored on a brand-new device; v1 files still import.
+const BACKUP_VERSION = 2;
+
+function sameBytes(a, b) {
+  if (!a || !b || a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i += 1) if (a[i] !== b[i]) return false;
+  return true;
+}
 
 function isBinaryShape(payload) {
   return payload?.ciphertext instanceof ArrayBuffer;
@@ -33,16 +41,20 @@ function deserializePayload(wire) {
 }
 
 export async function exportBackup(db) {
-  const [entries, notebooks, attachments, entryVersions] = await Promise.all([
+  const [entries, notebooks, attachments, entryVersions, setupRecord] = await Promise.all([
     db.entries.toArray(),
     db.notebooks.toArray(),
     db.attachments.toArray(),
     db.entryVersions.toArray(),
+    db.settings.get('passphraseSetup'),
   ]);
 
   return {
     backupVersion: BACKUP_VERSION,
     exportedAt: new Date().toISOString(),
+    passphraseSetup: setupRecord?.value
+      ? { salt: bytesToBase64(setupRecord.value.salt), verifier: setupRecord.value.verifier }
+      : null,
     entries: entries.map((e) => ({
       ...e,
       titlePayload: serializePayload(e.titlePayload),
@@ -71,7 +83,34 @@ export async function importBackup(db, backup, { mode = 'skip' } = {}) {
     throw new Error('This file doesn\u2019t look like a SecureDiary backup.');
   }
 
-  const result = { entries: 0, notebooks: 0, attachments: 0, entryVersions: 0, skipped: 0 };
+  const result = { entries: 0, notebooks: 0, attachments: 0, entryVersions: 0, skipped: 0, setup: 'none' };
+
+  // The salt/verifier decide which passphrase unlocks the data, so they are
+  // reconciled BEFORE anything is written. Entries made with a different salt
+  // would be unreadable under this device's passphrase.
+  if (backup.passphraseSetup?.salt && backup.passphraseSetup?.verifier) {
+    const incomingSalt = base64ToBytes(backup.passphraseSetup.salt);
+    const local = await db.settings.get('passphraseSetup');
+    if (!local?.value) {
+      await db.settings.put({
+        key: 'passphraseSetup',
+        value: { salt: incomingSalt, verifier: backup.passphraseSetup.verifier },
+      });
+      result.setup = 'restored';
+    } else if (sameBytes(local.value.salt, incomingSalt)) {
+      result.setup = 'same';
+    } else if ((await db.entries.count()) === 0) {
+      await db.settings.put({
+        key: 'passphraseSetup',
+        value: { salt: incomingSalt, verifier: backup.passphraseSetup.verifier },
+      });
+      result.setup = 'replaced';
+    } else {
+      throw new Error(
+        'This backup was made with a different passphrase than the one protecting this diary. Restore it into an empty diary instead.'
+      );
+    }
+  }
 
   async function upsertTable(table, rows, countKey) {
     for (const row of rows) {

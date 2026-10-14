@@ -9,6 +9,8 @@ import ErrorBoundary from './health/ErrorBoundary.jsx';
 import UpdatePrompt from './health/UpdatePrompt.jsx';
 import { generateSalt, deriveKeyFromPassphrase, encryptData, decryptData } from './utils/crypto.js';
 import { db } from './db/schema.js';
+import { useVisualViewport } from './hooks/useVisualViewport.js';
+import { useDialogFocus } from './hooks/useDialogFocus.js';
 
 // Quiet, console-only regression check for the crypto/db foundation -
 // uses its own throwaway key, entirely independent of the real
@@ -37,6 +39,8 @@ function useFoundationSmokeTest() {
 
 export default function App() {
   useFoundationSmokeTest();
+  useVisualViewport();
+  useDialogFocus();
 
   return (
     <ErrorBoundary level="app">

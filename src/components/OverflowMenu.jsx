@@ -41,8 +41,9 @@ export default function OverflowMenu({ items, children, buttonClassName }) {
       {open && (
         <>
           <div className={styles.backdrop} onPointerDown={() => setOpen(false)} aria-hidden="true" />
-          <div className={styles.menu} role="menu" aria-label="More actions">
+          <div className={styles.menu}>
             {children && <div className={styles.slot}>{children}</div>}
+            <div className={styles.list} role="menu" aria-label="More actions">
             {items.map((item, i) => {
               const common = {
                 key: item.key,
@@ -70,6 +71,7 @@ export default function OverflowMenu({ items, children, buttonClassName }) {
                 </button>
               );
             })}
+            </div>
           </div>
         </>
       )}
