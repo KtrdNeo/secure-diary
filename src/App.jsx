@@ -10,6 +10,7 @@ import UpdatePrompt from './health/UpdatePrompt.jsx';
 import { generateSalt, deriveKeyFromPassphrase, encryptData, decryptData } from './utils/crypto.js';
 import { db } from './db/schema.js';
 import { useVisualViewport } from './hooks/useVisualViewport.js';
+import { usePerformanceMode } from './hooks/usePerformanceMode.js';
 import { useDialogFocus } from './hooks/useDialogFocus.js';
 
 // Quiet, console-only regression check for the crypto/db foundation -
@@ -41,6 +42,7 @@ export default function App() {
   useFoundationSmokeTest();
   useVisualViewport();
   useDialogFocus();
+  usePerformanceMode();
 
   return (
     <ErrorBoundary level="app">

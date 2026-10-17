@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/schema.js';
+import { isSealed } from '../features/capsule.js';
 import { decryptData, decryptBinary } from '../utils/crypto.js';
 import { useSessionKey } from '../session/SessionKeyProvider.jsx';
 import { decodeYDoc, yDocToPlainText } from '../components/editor/yjsUtils.js';
@@ -61,7 +62,8 @@ export function SearchIndexProvider({ children }) {
           const titleData = await decryptData(meta.titlePayload, cryptoKey);
           const contentBytes = await decryptBinary(meta.contentPayload, cryptoKey);
           if (cancelled) return;
-          const plainText = yDocToPlainText(decodeYDoc(new Uint8Array(contentBytes)));
+          // Sealed time capsules are findable by title only until they open.
+          const plainText = isSealed(titleData.sealUntil) ? '' : yDocToPlainText(decodeYDoc(new Uint8Array(contentBytes)));
 
           const entryForIndex = { id: meta.id, title: titleData.title || '', content: plainText, createdAt: meta.updatedAt };
           if (alreadyAt === undefined) {

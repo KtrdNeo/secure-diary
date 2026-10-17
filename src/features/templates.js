@@ -17,6 +17,7 @@ const listItem = () => node('listItem', [p()]);
 const bullets = (n = 3) => node('bulletList', Array.from({ length: n }, listItem));
 const numbered = (n = 3) =>
   node('orderedList', Array.from({ length: n }, listItem), { start: 1 });
+const branch = (t = '') => node('listItem', [p(t), node('bulletList', [listItem(), listItem()])]);
 const callout = (variant, t) => node('callout', [p(t)], { variant });
 
 export function dateLabel(date = new Date()) {
@@ -106,6 +107,22 @@ export const TEMPLATES = [
         h(2, 'One kind thing I can do for myself'),
         p(),
         callout('info', 'Rate your mood 1-10 and note it here.'),
+      ],
+    }),
+  },
+  {
+    id: 'mindmap',
+    label: 'Mind map',
+    icon: '✺',
+    description: 'A central idea with branches to expand.',
+    build: (date) => ({
+      title: `Mind map - ${dateLabel(date)}`,
+      content: [
+        h(2, 'Central idea'),
+        p(),
+        h(2, 'Branches'),
+        node('bulletList', [branch('Branch one'), branch('Branch two'), branch('Branch three')]),
+        callout('tip', 'Press Tab inside a bullet to nest a thought one level deeper.'),
       ],
     }),
   },

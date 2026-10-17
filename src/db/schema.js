@@ -23,9 +23,10 @@
 
 import Dexie from 'dexie';
 
-export const db = new Dexie('SecureDiaryDB');
+function defineSchema(database) {
+  const d = database;
 
-db.version(1).stores({
+d.version(1).stores({
   // Diary/note entries. `titlePayload` + `contentPayload` = encrypted
   // (see top-of-file comment for the split). Compound index
   // [notebookId+isDeleted] powers the common "list live entries in this
@@ -62,16 +63,67 @@ db.version(1).stores({
 // doesn't require decrypting every version just to list them by date.
 // Purely additive (new table, no changes to existing ones) - Dexie
 // carries all existing local data forward automatically.
-db.version(2).stores({
+d.version(2).stores({
   entryVersions: '++id, entryId, createdAt',
 });
 
 // Version 3: compound index so sync-queue de-duplication
 // (`where({ entityType, entityId })`) is an index lookup, not a scan.
 // Index-only change: existing rows carry forward untouched.
-db.version(3).stores({
+d.version(3).stores({
   syncQueue: '++id, entityType, entityId, operation, createdAt, attempts, [entityType+entityId]',
 });
+  return d;
+}
+
+export const MAIN_DB_NAME = 'SecureDiaryDB';
+/** Neutral name on purpose - see features/stealth.js. */
+export const STEALTH_DB_NAME = 'SecureDiaryCache';
+
+const mainDb = defineSchema(new Dexie(MAIN_DB_NAME));
+let stealthDb = null;
+let active = mainDb;
+
+export function getStealthDb() {
+  if (!stealthDb) stealthDb = defineSchema(new Dexie(STEALTH_DB_NAME));
+  return stealthDb;
+}
+
+/** Drops the cached stealth instance (after the vault is deleted) so a later create starts clean. */
+export function resetStealthDb() {
+  if (active === stealthDb) active = mainDb;
+  stealthDb = null;
+}
+
+/** Switch which database `db` points at. Only done at unlock/lock time, never mid-session. */
+export function activateDb(which) {
+  active = which === 'stealth' ? getStealthDb() : mainDb;
+}
+
+export function isStealthActive() {
+  return active !== mainDb;
+}
+
+/**
+ * `db` always forwards to the ACTIVE database, so every existing import keeps
+ * working unchanged while the stealth vault can swap in a separate store.
+ */
+export const db = new Proxy(
+  {},
+  {
+    get(_target, prop) {
+      const value = Reflect.get(active, prop);
+      // db.on is a function WITH sub-properties (db.on.ready ...) - must stay as-is.
+      return typeof value === 'function' && prop !== 'on' ? value.bind(active) : value;
+    },
+    set(_target, prop, value) {
+      return Reflect.set(active, prop, value);
+    },
+    has(_target, prop) {
+      return prop in active;
+    },
+  }
+);
 
 /**
  * Convenience flag constants, since IndexedDB indexes need 0/1 rather

@@ -64,3 +64,14 @@ video {
     scroll-behavior: auto !important;
   }
 }
+
+/* Battery Saver: no motion, no blur, lighter shadows. */
+html[data-saver='on'] *,
+html[data-saver='on'] *::before,
+html[data-saver='on'] *::after {
+  animation: none !important;
+  transition-duration: 0s !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  scroll-behavior: auto !important;
+}
