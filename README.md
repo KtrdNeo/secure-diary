@@ -17,6 +17,10 @@ Templates and daily writing prompts, rich text (checklists, choice lists, tables
 
 `npm run build && npx vite preview --port 4180 &` then `python3 scripts/responsive-audit.py` (needs Python Playwright) screenshots the app on 9 device sizes into `audit/` and lists layout problems. `scripts/responsive-sweep.py` runs a 750-combination size/text-scale/theme sweep. `scripts/a11y-axe.py` runs an axe-core WCAG scan (needs `npm i axe-core` somewhere; set `AXE=`). `scripts/browser-smoke.py` checks lock/unlock, delete/restore and wrong-passphrase flows.
 
+## More features
+
+Markdown and encrypted `.diary` export, Sinhala-ready Print/Save-as-PDF, Battery Saver, Ambient sounds, Sinhala voice typing and photo scan, Time Capsule (seal an entry until a date), Stealth vault (second passphrase -> separate diary), Connections map and a Mind-map template. Run `python3 scripts/browser-features.py` and `scripts/browser-stealth.py` against `vite preview` to check them end-to-end.
+
 ## Deploying
 
 ```bash

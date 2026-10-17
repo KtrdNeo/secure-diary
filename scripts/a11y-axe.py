@@ -30,6 +30,13 @@ with sync_playwright() as p:
                 pg.get_by_role('button', name=name).first.click(); time.sleep(.5)
                 total += run(pg, f'{name} open ({theme})'); pg.keyboard.press('Escape'); time.sleep(.3)
             except Exception as e: print('skip', name, str(e)[:60])
+        # dialogs reached through the More menu
+        for label, tag in (('Settings', 'Settings'), ('Ambient', 'Ambient sounds'), ('Connections', 'Connections')):
+            try:
+                pg.get_by_role('button', name='More').click(); time.sleep(.3)
+                pg.locator('[role=menu] >> text=/^' + label + '/').first.click(); time.sleep(.8)
+                total += run(pg, f'{tag} dialog ({theme})'); pg.keyboard.press('Escape'); time.sleep(.3)
+            except Exception as e: print('skip', tag, str(e)[:80])
         ctx.close()
     b.close()
 print('TOTAL', total)

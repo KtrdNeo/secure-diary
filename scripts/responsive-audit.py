@@ -77,13 +77,14 @@ with sync_playwright() as p:
             pg.screenshot(path=f'{OUT}/{dev}-4-table.png'); report(f'{dev}/table', pg, bucket)
         except Exception as e: bucket.append(f'[{dev}] table click failed: {str(e)[:80]}')
         more = pg.locator('button[aria-label="More"]').count() > 0 and pg.locator('button[aria-label="More"]').is_visible()
-        def go(label, tag, via_more=more, scope='nav,header'):
+        def go(label, tag, via_more=None, scope=None):
             try:
-                if via_more:
-                    pg.click('button[aria-label="More"]'); time.sleep(.25)
-                    pg.locator('[role=menu] >> text=/^' + label + '/').first.click()
+                pill = pg.locator(f'header nav button[aria-label="{label}"]')
+                if pill.count() and pill.first.is_visible():
+                    pill.first.click()
                 else:
-                    pg.locator(f'{scope} button:has-text("{label}"), footer button:has-text("{label}")').first.click()
+                    pg.click('button[aria-label="More"]'); time.sleep(.25)
+                    pg.locator('[role=menu] >> text=/^' + ('Ambient' if label == 'Sounds' else label) + '/').first.click()
                 time.sleep(.6)
                 pg.screenshot(path=f'{OUT}/{dev}-5-{tag}.png'); report(f'{dev}/{tag}', pg, bucket)
                 pg.keyboard.press('Escape'); time.sleep(.3)
@@ -92,8 +93,8 @@ with sync_playwright() as p:
             except Exception as e:
                 bucket.append(f'[{dev}/{tag}] FAILED {str(e)[:100]}')
                 pg.keyboard.press('Escape'); time.sleep(.3)
-        for label, tag in [('Stats','stats'),('Help','help'),('Settings','settings'),('Admin','admin'),('Sync','sync'),('Legal','legal'),('Search','search')]:
-            go(label, tag, via_more=(more and label not in ('Search',)))
+        for label, tag in [('Stats','stats'),('Help','help'),('Settings','settings'),('Admin','admin'),('Sync','sync'),('Legal','legal'),('Sounds','sounds'),('Connections','mesh'),('Contents','contents'),('Security','security'),('Search','search')]:
+            go(label, tag)
         try:
             pg.click('button[aria-label="Sinhala input"]'); time.sleep(.5)
             pg.screenshot(path=f'{OUT}/{dev}-6-sinhala.png'); report(f'{dev}/sinhala', pg, bucket); pg.locator('[role=dialog] button[aria-label=Close], [role=dialog] button:has-text("Cancel")').first.click(); time.sleep(.4)

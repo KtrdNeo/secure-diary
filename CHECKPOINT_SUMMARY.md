@@ -265,3 +265,111 @@ Date: 2026-08-30. First real-browser test of this entire project (everything bef
 ## Built-in diagnostics page (trust problem)
 
 Date: 2026-09-24. After the blank-screen incident, added `public/diagnostics.html` - a standalone page with **zero dependency on the React bundle**, reachable at `/diagnostics.html` and linked from the Footer and from `PassphraseGate`'s own error state (the exact scenario it exists for). It runs live, real checks in the browser - not simulated, not trusting any prior claim: fetches `build-info.json` (auto-generated at build time via a `prebuild` npm hook, so it always reflects the actual deployed build's version + timestamp), confirms IndexedDB/Web Crypto/Service Worker are actually present, then runs a genuine AES-GCM encrypt/decrypt round trip and a genuine IndexedDB write/read round trip against a disposable test database - not the real one. If the main app ever fails to render again, this page is the independent way to check whether the deployment itself is healthy, without needing to trust anything Claude said about it.
+
+---
+
+## Feature pack (post-deployment): making the app feel complete
+
+Date: 2026-10-10. After seeing the live app, the user reported it felt "empty, feature-less". First real-browser run of the built app (headless Chromium, `scripts/browser-smoke.py`) found the actual reason: **the formatting toolbar never rendered** (`useEditorState` bound to a not-yet-created editor never recovered; `Toolbar` returned `null`). Fixed by mounting `Toolbar` only once the editor exists. Also fixed: Tailwind preflight had stripped list bullets/numbers, and list/task items had oversized paragraph margins.
+
+**Data-loss bug found and fixed (important):** the Lock feature exposed a latent flaw. After first-run setup, `PassphraseGate` never updated its in-memory `setupRecord`, and kept the typed passphrase in state, so after Lock the gate could treat the diary as first-run and **overwrite the stored passphrase salt**, making existing entries undecryptable, and the editor then autosaved a blank page over the real entry. Fixes: (1) gate refreshes `setupRecord` after create and clears passphrase fields on lock; (2) `handleCreate` refuses to overwrite an existing `passphraseSetup`; (3) `EntryEditor` never autosaves when decrypting a stored entry failed, and shows a notice instead.
+
+**New features**
+- Welcome card on empty pages: 6 templates (daily, gratitude, to-do, meeting, mood, weekly) + prompt of the day with shuffle (30 prompts); dismissible, compact on mobile.
+- Labelled toolbar buttons (Checklist, Choices, Table, Note, Draw, Voice, Sinhala).
+- Top bar: New entry (jump to blank page), Search, Stats, Help, Settings, Lock.
+- Word count + reading time; per-entry Export (.txt); Delete = soft delete to trash (confirm), Admin > Trash restores all.
+- Stats: current/longest streak, totals, last 7 days, this month (from entry dates only, nothing decrypted).
+- Lock now + idle auto-lock (Off/5/15/30/60 min, default 15) with flush of pending autosave before the key is wiped.
+- Help / Getting started modal (also in footer). Admin closes on Esc; Admin tabs scroll on narrow screens.
+- Shared helpers: `src/features/*` (templates, prompts, stats, textStats, autoLock, syncQueue, trash, download). 141 tests (126 + 15 new), clean build.
+
+**Known limitations:** trash is restore-only (no permanent delete, so sync never has to propagate hard deletes); idle auto-lock is not covered by an automated browser test (the timing logic is unit-tested); Dexie warns that `syncQueue` would benefit from a `[entityType+entityId]` index (performance hint only); bundle still ~1.4MB; Sinhala PDF export and live Supabase sync remain as noted earlier.
+
+---
+
+## Responsive overhaul (mobile-first)
+
+Date: 2026-10-11. Feedback: layout "not refined / not responsive, especially on mobile". An automated audit (`scripts/responsive-audit.py`, Playwright) drives the built app at 9 sizes (320x568, 360x640, 390x844, 430x932, 844x390 landscape, 768x1024, 1024x768, 1280x800, 1920x1080) through gate, blank page, writing, table, every dialog, Sinhala and drawing, and reports page overflow, off-screen controls, tap targets under 36px (mobile) and inputs under 16px (iOS zoom). Baseline on a 390px phone: ~295 findings; now 0 everywhere except the landscape-phone passphrase screen, which scrolls by design (a taller form than 390px).
+
+**What changed**
+- App shell is a fixed `100dvh` app: slim app bar, the diary filling the rest, one-line footer; the window itself never scrolls. Safe-area insets, `viewport-fit=cover`, `interactive-widget=resizes-content` (keyboard resizes the layout on Chrome Android).
+- App bar: phones show New / Search / Lock + a "More" menu (Stats, Help, Settings, Admin, Sync, Legal, Diagnostics, theme); tablets add labels; >=1024px shows all actions, footer links and the theme switcher.
+- Visible page navigation (prev/next buttons + "Page x of y") under the paper; the folded corner remains on desktop only.
+- Cover/rings slim down on phones; cover grows to 1120x900 on large screens; text column capped to a readable measure.
+- Toolbar: single swipeable row on phones/landscape (signature inserts Draw/Voice/Sinhala surfaced first), wrapping on tablets/desktop, 40px touch targets on coarse pointers.
+- Welcome card: swipeable template chips, compact on small screens, hidden on short landscape.
+- Status bar: 40px actions, short "Saved 9:41 AM" text, word count; clear of the page corner.
+- All dialogs are bottom sheets on phones (drawing is full-screen); Esc closes dialogs; inputs >=16px; tables scroll inside themselves.
+- Editor dialogs are now portalled to `<body>` (CSS `perspective` on the page-flip container had trapped `position:fixed` dialogs inside the page and under the app bar).
+- "Ready to work offline" toast auto-dismisses and no longer covers the footer.
+
+**Known limits:** real-device keyboard behaviour (iOS Safari especially) is unverified - headless Chromium cannot show a software keyboard; verify on a physical phone. Landscape-phone gate scrolls.
+
+---
+
+## Perfection pass (hardening)
+
+- `scripts/responsive-sweep.py`: 750-combination sweep (viewport sizes x text scale 100/130/160% x themes) checking overflow, off-screen controls, tap targets and minimum writing area; only two extreme combos fail (1024x568 and 1100x568 at 160% text: writing area under 110px).
+- Theme tokens `--ink-on-backdrop`, `--danger`, `--paper-sheen`, `color-scheme` per theme; sepia secondary ink darkened; no opacity on text -> WCAG AA contrast on light/dark/sepia. `theme-color` meta follows the backdrop.
+- Short-height rules (<=500px, <=420px): toolbar swipe row, welcome card hidden, footer hidden, compact gate; tap targets stay >=32px.
+- Search dialog has a visible Close button; native search cancel hidden; 48px result rows.
+- Welcome card sits below the toolbar; offline toast has a lower z-index so it never covers dialog buttons; copy cleanup in Admin and Sinhala panels.
+- Verified: audit 0 issues on 9 devices (landscape gate scrolls), browser-smoke passes, 141/141 tests, clean build.
+
+**Honest limits:** real iPhone keyboard behaviour unverified; no swipe-to-turn-page gesture (buttons + desktop corner only); landscape-phone passphrase screen scrolls.
+
+---
+
+## Q&A loop ("is it perfect?") - rounds 1-4
+
+| Round | Question found | Fix |
+|---|---|---|
+| 1 | Baseline: tests 148/148, build clean; swipe page-turn, Dexie `[entityType+entityId]` index and "Delete forever" in Trash were already in place | - |
+| 2 | iPhone SE-size (320x568) passphrase set-up scrolled (615 > 568); 1023x568 and 160%-text writing area <110px | Compact portrait-phone tier in `PassphraseGate.module.css`; toolbar becomes a swipe row at `max-height: 620px`; sweep script waits 150ms per resize (19 earlier "failures" were a timing artifact after 1440->360px jumps) |
+| 3 | New axe-core WCAG A/AA scan (`scripts/a11y-axe.py`): `aria-required-children` on the More menu (theme radios inside `role=menu`) | Theme switcher moved out of the `role=menu` list in `OverflowMenu.jsx` |
+| 4 | Sinhala could not be exported to PDF (pdf-lib has no shaping) | `src/features/printEntries.js` + Admin > Export > "Print / Save as PDF (Sinhala-ready)": browser renders the text, credit footer on every page; 2 new tests |
+
+Result: 150/150 tests, audit 0 issues on all 9 devices (incl. landscape and 320x568), sweep 750/750 clean, axe 0 violations (gate, editor, Search, More; light + dark), browser-smoke passes, clean build.
+
+**Cannot be verified from here:** real iPhone/Android software-keyboard behaviour (handled via `visualViewport` -> `--app-h`, but only a physical device proves it); live Supabase sync against a real project; Lighthouse score. Main bundle ~760 kB (Admin/PDF chunk is lazy).
+
+---
+
+## Spec completion pass (01_REQUIREMENTS feature matrix)
+
+Gap audit against `01_REQUIREMENTS_AND_FEATURES.md` found these missing; all built, tested and browser-verified:
+
+| Spec item | What shipped |
+|---|---|
+| #12 Data portability (Markdown, encrypted `.diary`) | `features/markdown.js` (Y.Doc -> Markdown: headings, marks, lists, tasks, quotes, callouts, tables, code); per-entry Export is now `.md`; Admin > Export "Markdown (.md) - all entries"; Admin > Backup is now the encrypted `.diary` file (same ciphertext format; import accepts `.diary` and legacy `.json`) |
+| Sinhala PDF (known gap) | `features/printEntries.js`: Admin > Export > "Print / Save as PDF (Sinhala-ready)" - the browser shapes Sinhala; credit footer on every page |
+| #11 Battery Saver | Settings > Battery Saver (Automatic / On / Off). Auto = low unplugged battery (Battery API) or `prefers-reduced-motion`. Sets `<html data-saver>`; disables animations/blur and makes page turns instant |
+| #5 Binaural Ambient Hub | `features/ambient.js` + `AmbientPanel`: Focus (beta 15 Hz), Calm (alpha 10 Hz), Sleep (delta 3 Hz) binaural presets, rain and brown noise; WebAudio only; stops on lock |
+| #7 Sinhala Voice + OCR | Sinhala panel gains "Speak" (Web Speech API, si-LK/en/ta; UI warns audio goes to the browser's speech service) and "Scan photo" (tesseract.js `sin+eng`, lazy-loaded; first scan downloads language files) |
+| #10 Opus compression | Voice notes record at 24 kbit/s Opus (strokes were already simplified) |
+| #5 Time Capsule | Entry "Seal" until a date; `sealUntil` lives inside the encrypted title payload (syncs, private); sealed body is hidden, excluded from search and exports; "Open early" available |
+| #5 Panic Stealth Vault | Settings > Stealth vault: a second passphrase opens a separate empty diary in its own IndexedDB (`SecureDiaryCache`). `db` is now a Proxy over the active database (`activateDb`); lock always returns to the real diary; stealth section hidden inside the stealth diary. Defeats shoulder-surfing, NOT forensic inspection |
+| #5 AI Auto-Mesh | "Connections": TF-IDF keyword graph of entries computed on-device (`features/mesh.js`), tap a node to see related entries and open one |
+| #14 Mind maps | "Mind map" template (central idea + nested branches). Not a free-form canvas mind map |
+
+Tests: 171 (up from 141). New scripts: `scripts/browser-features.py`, `scripts/browser-stealth.py`, `scripts/a11y-axe.py` (extended to Settings/Ambient/Connections). Audit 0 issues on 9 devices, sweep 750/750, axe 0 violations, smoke passes.
+
+**Still not verified / not built:** real-phone keyboard behaviour; live Supabase sync; OCR and speech need a real browser with network/microphone (logic and UI tested, recognition itself not); free-form mind-map canvas; Rule 01 DevTools blocking / hidden integrity checks (deliberately not implemented - visible credit, Legal modal and console banner instead).
+
+---
+
+## UI/UX redesign pass (2026-10-18)
+
+Feedback: binder rings looked stretched (ovals), UI not responsive/refined enough, wanted security and functionality improved too.
+
+- **Rings:** were `aspect-ratio: 1.4/1` ovals. Now true circles (`--ring-d` drives width and height); `RingBinder` measures its column with `ResizeObserver` and picks the diameter from the width (`features/rings.js`) and the COUNT from the height so rings never touch. Brass highlight + recessed hole.
+- **One text column:** title, toolbar offset, text, welcome card and status bar share `--px` so everything lines up; toolbar stays one row.
+- **Header:** primary actions (New entry, Search, Contents, Security, Lock) + one "More" menu (Stats, Connections, Ambient, Settings, Help, Admin, Sync, Legal, Diagnostics; Contents/Security too on narrow screens). Pill labels appear by an EM-based container query (`@container bar (min-width: 56em)`), so large text/zoom hides labels instead of overflowing. Theme switcher inline on desktop, inside the menu otherwise.
+- **Contents:** new panel (also opened by tapping "Page x of y"): every entry by month, filter by title, sealed entries marked, jump on tap (`features/contents.js`).
+- **Page controls:** pill-shaped group with solid 44x40 buttons.
+- **Security panel:** one-glance status (AES-GCM-256 / Argon2id, stored locally, sync on/off, auto-lock, session start) with Lock now and the privacy-shield toggle.
+- **Privacy shield:** covers the diary when the tab/app goes to background or loses focus (default ON for touch devices, OFF on desktop; `features/privacy.js`, `PrivacyShield.jsx`). Not a lock - the key stays in memory until auto-lock.
+- Verified: 176 unit tests; audit 0 issues on 9 devices incl. Contents/Security; sweep 750/750; axe 0 violations (incl. Settings/Ambient/Connections); `browser-features.py` now also checks ring roundness at 4 sizes, Contents, Security and the shield; stealth + smoke flows pass.
+
+**App icon (2026-10-18):** the leather-diary-with-lock artwork replaces the old icon. Source: `assets-src/diary-icon-source.jpg`; `python3 scripts/make-icons.py` regenerates `icon-192/512`, `icon-maskable-192/512` (on a warm paper tone, inside the 66% safe zone), `apple-touch-icon`, `favicon-32` and `brand-mark.png` (used in the app bar and unlock screen). Check you hold the rights to the artwork you use.
