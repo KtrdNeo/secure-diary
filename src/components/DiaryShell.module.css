@@ -19,6 +19,9 @@
 /* ---- app bar ------------------------------------------------------- */
 
 .appBar {
+  /* Labels appear only when the bar is wide in EM (so large text hides them sooner). */
+  container-type: inline-size;
+  container-name: bar;
   flex: none;
   position: relative;
   z-index: 30;
@@ -42,11 +45,11 @@
 
 .brandMark {
   flex: none;
-  width: 22px;
-  height: 26px;
-  border-radius: 4px 6px 6px 4px;
-  background: linear-gradient(135deg, var(--cover-highlight), var(--cover-base));
-  box-shadow: inset 3px 0 0 var(--metal-base), 0 2px 5px rgba(0, 0, 0, 0.3);
+  height: 30px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
+  user-select: none;
 }
 
 .brandName {
@@ -131,7 +134,7 @@
 
 /* ---- breakpoints ------------------------------------------------------ */
 
-@media (min-width: 600px) {
+@container bar (min-width: 56em) {
   .label {
     display: inline;
   }

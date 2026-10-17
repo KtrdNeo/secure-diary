@@ -8,6 +8,8 @@ import { exportEntriesToPdf } from '../health/pdfExport.js';
 import { decryptData, decryptBinary } from '../utils/crypto.js';
 import { decodeYDoc, yDocToPlainText } from './editor/yjsUtils.js';
 import { downloadBytes } from '../features/download.js';
+import { yDocToMarkdown, entriesToMarkdown } from '../features/markdown.js';
+import { isSealed } from '../features/capsule.js';
 import { printEntries } from '../features/printEntries.js';
 import { countDeleted, restoreDeletedEntries, purgeDeletedEntries } from '../features/trash.js';
 import styles from './AdminDashboard.module.css';
@@ -71,7 +73,7 @@ export default function AdminDashboard({ onClose }) {
   async function handleExportBackup() {
     const backup = await exportBackup(db);
     const bytes = new TextEncoder().encode(JSON.stringify(backup, null, 2));
-    downloadBlob(bytes, `secure-diary-backup-${new Date().toISOString().slice(0, 10)}.json`, 'application/json');
+    downloadBlob(bytes, `secure-diary-backup-${new Date().toISOString().slice(0, 10)}.diary`, 'application/x-securediary');
     setStatusMessage('Backup downloaded.');
   }
 
@@ -101,11 +103,17 @@ export default function AdminDashboard({ onClose }) {
       try {
         const titleData = entry.titlePayload ? await decryptData(entry.titlePayload, cryptoKey) : { title: '' };
         let bodyText = '';
-        if (entry.contentPayload) {
+        let bodyMarkdown = '';
+        if (isSealed(titleData.sealUntil)) {
+          bodyText = `[Sealed time capsule - opens ${new Date(titleData.sealUntil).toLocaleDateString()}]`;
+          bodyMarkdown = `*${bodyText}*`;
+        } else if (entry.contentPayload) {
           const bytes = await decryptBinary(entry.contentPayload, cryptoKey);
-          bodyText = yDocToPlainText(decodeYDoc(new Uint8Array(bytes)));
+          const doc = decodeYDoc(new Uint8Array(bytes));
+          bodyText = yDocToPlainText(doc);
+          bodyMarkdown = yDocToMarkdown(doc);
         }
-        decrypted.push({ title: titleData.title, bodyText, createdAt: entry.createdAt });
+        decrypted.push({ title: titleData.title, bodyText, bodyMarkdown, createdAt: entry.createdAt });
       } catch {
         decrypted.push({ title: '[unreadable entry]', bodyText: '', createdAt: entry.createdAt });
       }
@@ -120,6 +128,18 @@ export default function AdminDashboard({ onClose }) {
     const pdfBytes = await exportEntriesToPdf(decrypted);
     downloadBlob(pdfBytes, `secure-diary-export-${new Date().toISOString().slice(0, 10)}.pdf`, 'application/pdf');
     setStatusMessage(`Exported ${decrypted.length} entries to PDF.`);
+  }
+
+  async function handleExportMarkdown() {
+    if (!cryptoKey) return;
+    setStatusMessage('Preparing Markdown\u2026');
+    const decrypted = (await loadDecryptedEntries()).sort((a, b) => a.createdAt - b.createdAt);
+    downloadBlob(
+      new TextEncoder().encode(entriesToMarkdown(decrypted)),
+      `secure-diary-export-${new Date().toISOString().slice(0, 10)}.md`,
+      'text/markdown'
+    );
+    setStatusMessage(`Exported ${decrypted.length} entries to Markdown (not encrypted - keep the file safe).`);
   }
 
   async function handlePrintAll() {
@@ -289,7 +309,7 @@ export default function AdminDashboard({ onClose }) {
               passphrase) as this app&rsquo;s own storage.
             </p>
             <button type="button" className={styles.actionButton} onClick={handleExportBackup}>
-              Download backup (.json)
+              Download encrypted backup (.diary)
             </button>
             <button type="button" className={styles.actionButton} onClick={() => fileInputRef.current?.click()}>
               Restore from backup
@@ -297,7 +317,7 @@ export default function AdminDashboard({ onClose }) {
             <input
               ref={fileInputRef}
               type="file"
-              accept="application/json"
+              accept=".diary,.json,application/json"
               className={styles.hiddenInput}
               onChange={handleImportBackup}
             />
@@ -308,13 +328,16 @@ export default function AdminDashboard({ onClose }) {
           <div className={styles.section}>
             <p className={styles.hint}>
               Quick PDF is Latin text only. For Sinhala (or any other script) use Print / Save as PDF -
-              your browser draws the text correctly. Both add the attribution line on every page.
+              your browser draws the text correctly. Both add the attribution line on every page. Markdown is plain text (not encrypted) - handle the file with care.
             </p>
             <button type="button" className={styles.actionButton} onClick={handleExportAllPdf}>
               Quick PDF (Latin text)
             </button>
             <button type="button" className={styles.actionButton} onClick={handlePrintAll}>
               Print / Save as PDF (Sinhala-ready)
+            </button>
+            <button type="button" className={styles.actionButton} onClick={handleExportMarkdown}>
+              Markdown (.md) - all entries
             </button>
           </div>
         )}

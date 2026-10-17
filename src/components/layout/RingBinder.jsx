@@ -1,28 +1,39 @@
+import { useLayoutEffect, useRef, useState } from 'react';
+import { ringCount, ringDiameter } from '../../features/rings.js';
 import styles from './RingBinder.module.css';
 
-const RING_COUNT = 7;
-
 /**
- * A column of metal rings along the spine.
+ * A column of round metal binder rings along the spine.
  *
- * Deliberately NOT a single stretched SVG: this strip's rendered aspect
- * ratio varies a lot across viewports (~28-44px wide, ~480-700px tall),
- * and a shared viewBox stretched via preserveAspectRatio="none" to fill
- * that box would scale X and Y independently - squashing every ring
- * into a thin sliver instead of a recognizable ring. Each ring below is
- * its own element with a fixed aspect-ratio, so it keeps its own correct
- * proportions no matter how tall the strip is; only the spacing between
- * rings (handled by the flex column) responds to the container size.
- *
- * The "hole" is a smaller circle layered on top, colored to match the
- * leather behind it - an approximation (real leather has grain/gradient
- * the flat color can't replicate exactly) but reads correctly as a
- * shadowed recess rather than a flaw.
+ * Every ring is a true circle (width === height === --ring-d); the column
+ * measures itself and picks the ring DIAMETER from its width and the ring
+ * COUNT from its height, so nothing ever stretches or touches at any size.
  */
 export default function RingBinder() {
+  const ref = useRef(null);
+  const [{ d, n }, setSize] = useState({ d: 28, n: 6 });
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    const measure = () => {
+      const { width, height } = el.getBoundingClientRect();
+      const diameter = ringDiameter(width);
+      setSize((prev) => {
+        const next = { d: diameter, n: ringCount(height, diameter) };
+        return prev.d === next.d && prev.n === next.n ? prev : next;
+      });
+    };
+    measure();
+    if (typeof ResizeObserver === 'undefined') return undefined;
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   return (
-    <div className={styles.binder} aria-hidden="true">
-      {Array.from({ length: RING_COUNT }, (_, i) => (
+    <div ref={ref} className={styles.binder} style={{ '--ring-d': `${d}px` }} aria-hidden="true">
+      {Array.from({ length: n }, (_, i) => (
         <span key={i} className={styles.ring}>
           <span className={styles.ringHole} />
         </span>

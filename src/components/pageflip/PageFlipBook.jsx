@@ -24,13 +24,25 @@ import styles from './PageFlipBook.module.css';
  * Only `transform` is animated, so this stays on the compositor thread
  * (GPU-accelerated, capable of 60fps) rather than triggering layout.
  */
-export default function PageFlipBook({ pages, fill = false, jumpToIndex = null, onJumpComplete }) {
+export default function PageFlipBook({ pages, fill = false, jumpToIndex = null, onJumpComplete, onIndexChange, onOpenContents }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flip, setFlip] = useState(null); // { direction, otherIndex, animate } | null
   const raf2Ref = useRef(null);
 
+  useEffect(() => {
+    onIndexChange?.(currentIndex);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentIndex]);
+
+  // Battery Saver: no 3D flip, just an instant cut.
+  const saverOn = () => document.documentElement.dataset.saver === 'on';
+
   const goNext = () => {
     if (flip || currentIndex >= pages.length - 1) return;
+    if (saverOn()) {
+      setCurrentIndex(currentIndex + 1);
+      return;
+    }
     const source = currentIndex;
     setCurrentIndex(source + 1);
     setFlip({ direction: 'forward', otherIndex: source, animate: false });
@@ -38,6 +50,10 @@ export default function PageFlipBook({ pages, fill = false, jumpToIndex = null, 
 
   const goPrev = () => {
     if (flip || currentIndex <= 0) return;
+    if (saverOn()) {
+      setCurrentIndex(currentIndex - 1);
+      return;
+    }
     setFlip({ direction: 'backward', otherIndex: currentIndex - 1, animate: false });
   };
 
@@ -164,9 +180,17 @@ export default function PageFlipBook({ pages, fill = false, jumpToIndex = null, 
         >
           <ChevronLeftIcon />
         </button>
-        <span className={styles.pageIndicator} aria-live="polite">
-          Page {currentIndex + 1} of {pages.length}
-        </span>
+        {onOpenContents ? (
+          <button type="button" className={styles.pageButton} onClick={onOpenContents} aria-label="Open contents">
+            <span aria-live="polite">
+              Page {currentIndex + 1} of {pages.length}
+            </span>
+          </button>
+        ) : (
+          <span className={styles.pageIndicator} aria-live="polite">
+            Page {currentIndex + 1} of {pages.length}
+          </span>
+        )}
         <button
           type="button"
           className={styles.navButton}

@@ -96,7 +96,7 @@ export default function VoiceRecorder({ onSave, onCancel }) {
       analyserRef.current = analyser;
 
       const mimeType = pickMimeType();
-      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      const recorder = new MediaRecorder(stream, { ...(mimeType ? { mimeType } : {}), audioBitsPerSecond: 24000 }) // low-bitrate Opus keeps notes small;
       chunksRef.current = [];
       recorder.ondataavailable = (e) => {
         if (e.data.size > 0) chunksRef.current.push(e.data);

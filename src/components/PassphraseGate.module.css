@@ -272,3 +272,17 @@
     min-height: 36px;
   }
 }
+
+.logo {
+  display: block;
+  width: 72px;
+  height: auto;
+  margin: 0 auto 10px;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.3));
+}
+
+@media (max-height: 680px) {
+  .logo {
+    display: none;
+  }
+}

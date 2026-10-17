@@ -1,4 +1,6 @@
 .editor {
+  /* One shared column for title, toolbar, text and status so everything lines up. */
+  --px: max(clamp(14px, 3vw, 28px), calc((100% - 46rem) / 2));
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -15,7 +17,7 @@
   border: none;
   background: transparent;
   color: var(--ink-primary);
-  padding: clamp(12px, 2.4vw, 26px) clamp(14px, 3vw, 28px) 4px;
+  padding: clamp(12px, 2.4vw, 26px) var(--px) 4px;
   outline: none;
   text-overflow: ellipsis;
 }
@@ -35,7 +37,7 @@
   font-family: var(--font-ui);
   font-size: 0.72rem;
   color: var(--ink-secondary);
-  padding: 2px clamp(10px, 2vw, 18px) 4px;
+  padding: 2px var(--px) 4px;
   min-height: 38px;
   border-top: 1px solid color-mix(in srgb, var(--ink-secondary) 16%, transparent);
 }
@@ -180,4 +182,62 @@
     padding-top: 4px;
     padding-bottom: 0;
   }
+}
+
+.sealed {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+  padding: 24px 16px;
+  margin: 12px 0;
+  border: 1px dashed color-mix(in srgb, var(--ink-secondary) 45%, transparent);
+  border-radius: 12px;
+  color: var(--ink-primary);
+}
+
+.sealedTitle {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  margin: 0;
+}
+
+.sealedText {
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--ink-secondary);
+  margin: 0;
+  max-width: 34ch;
+}
+
+.sealRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 8px 4px;
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  color: var(--ink-primary);
+}
+
+.sealDate {
+  min-height: 40px;
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--ink-secondary) 35%, transparent);
+  background: color-mix(in srgb, white 40%, var(--paper-base));
+  color: var(--ink-primary);
+}
+
+.sealNote {
+  flex-basis: 100%;
+  font-size: 0.74rem;
+  color: var(--ink-secondary);
 }

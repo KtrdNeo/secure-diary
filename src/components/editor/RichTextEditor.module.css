@@ -19,7 +19,7 @@
   min-height: 100%;
   box-sizing: border-box;
   /* On very wide pages keep a readable measure instead of a 1000px line. */
-  padding: clamp(12px, 3vw, 28px) max(clamp(14px, 3vw, 28px), calc((100% - 46rem) / 2));
+  padding: clamp(12px, 3vw, 28px) var(--px, clamp(14px, 3vw, 28px));
   overflow-wrap: anywhere;
   font-family: var(--font-page);
   font-size: clamp(1rem, 0.96rem + 0.2vw, 1.08rem);

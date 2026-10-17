@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { db } from '../db/schema.js';
+import { db, activateDb } from '../db/schema.js';
+import { tryStealthUnlock } from '../features/stealth.js';
 import {
   generateSalt,
   deriveKeyFromPassphrase,
@@ -76,6 +77,7 @@ export default function PassphraseGate({ children }) {
   // typed passphrase so it can never be reused (or resubmitted by mistake).
   useEffect(() => {
     if (!cryptoKey) {
+      activateDb('main'); // a stealth session never outlives a lock
       setPassphrase('');
       setConfirmPassphrase('');
       setShowPassphrase(false);
@@ -167,6 +169,14 @@ export default function PassphraseGate({ children }) {
       const key = await deriveKeyFromPassphrase(passphrase, salt);
       const ok = await verifyPassphrase(key, verifier);
       if (!ok) {
+        // Not the real passphrase - it may be the stealth one (a separate, harmless diary).
+        const stealthKey = await tryStealthUnlock(passphrase);
+        if (stealthKey) {
+          activateDb('stealth');
+          setFailures(0);
+          setCryptoKey(stealthKey);
+          return;
+        }
         const n = failures + 1;
         setFailures(n);
         const delay = throttleDelayMs(n);
@@ -221,6 +231,7 @@ export default function PassphraseGate({ children }) {
         onSubmit={isFirstRun ? handleCreate : handleUnlock}
       >
         <div className={styles.intro}>
+          <img className={styles.logo} src="/brand-mark.png" alt="" width="64" height="76" draggable="false" />
           <h1 className={styles.title}>{isFirstRun ? 'Set your passphrase' : 'Unlock your diary'}</h1>
 
           {isFirstRun && (

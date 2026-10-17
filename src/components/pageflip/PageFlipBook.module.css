@@ -32,22 +32,50 @@
 
 .pageNav {
   flex: none;
-  display: flex;
+  align-self: center;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 14px;
-  min-height: 40px;
+  gap: 4px;
+  padding: 3px;
+  min-height: 46px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--cover-shadow) 55%, transparent);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.35), 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-.pageIndicator {
-  min-width: 96px;
+.pageIndicator,
+.pageButton {
+  min-width: 108px;
+  min-height: 40px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   font-family: var(--font-ui);
-  font-size: 0.74rem;
-  letter-spacing: 0.03em;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
   color: #fff;
-  opacity: 0.85;
   font-variant-numeric: tabular-nums;
+}
+
+.pageButton {
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.pageButton:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.pageButton:focus-visible,
+.navButton:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
 }
 
 .navButton {
@@ -55,17 +83,17 @@
   align-items: center;
   justify-content: center;
   width: 44px;
-  height: 36px;
+  height: 40px;
   border: none;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.2);
   color: #fff;
   cursor: pointer;
   transition: background-color 0.15s ease, transform 0.1s ease;
 }
 
 .navButton:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.26);
+  background: rgba(255, 255, 255, 0.34);
 }
 
 .navButton:active:not(:disabled) {
@@ -73,21 +101,20 @@
 }
 
 .navButton:disabled {
-  opacity: 0.3;
+  opacity: 0.35;
   cursor: default;
-}
-
-.navButton:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 2px;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 @media (max-height: 500px) {
   .pageNav {
     min-height: 32px;
   }
-  .navButton {
-    height: 30px;
+  .navButton,
+  .pageIndicator,
+  .pageButton {
+    min-height: 32px;
+    height: 32px;
   }
 }
 

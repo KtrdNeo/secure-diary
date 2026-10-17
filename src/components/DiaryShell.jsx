@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import LeatherCover from './layout/LeatherCover.jsx';
 import RingBinder from './layout/RingBinder.jsx';
@@ -8,14 +8,21 @@ import ErrorBoundary from '../health/ErrorBoundary.jsx';
 import ThemeSwitcher from './ThemeSwitcher.jsx';
 import SearchPanel from './SearchPanel.jsx';
 import Footer from './Footer.jsx';
+import { stopAmbient } from '../features/ambient.js';
 const HelpModal = lazy(() => import('./HelpModal.jsx'));
 const StatsPanel = lazy(() => import('./StatsPanel.jsx'));
 const SettingsPanel = lazy(() => import('./SettingsPanel.jsx'));
 const AdminDashboard = lazy(() => import('./AdminDashboard.jsx'));
+const MeshPanel = lazy(() => import('./MeshPanel.jsx'));
+const AmbientPanel = lazy(() => import('./AmbientPanel.jsx'));
+const ContentsPanel = lazy(() => import('./ContentsPanel.jsx'));
+const SecurityPanel = lazy(() => import('./SecurityPanel.jsx'));
 const SyncPanel = lazy(() => import('./SyncPanel.jsx'));
 const LegalModal = lazy(() => import('./LegalModal.jsx'));
 import OverflowMenu from './OverflowMenu.jsx';
-import { PlusIcon, SearchIcon, LockIcon } from './icons.jsx';
+import { PlusIcon, SearchIcon, LockIcon, ShieldIcon, ListIcon } from './icons.jsx';
+import PrivacyShield from './PrivacyShield.jsx';
+import { useMediaQuery } from '../hooks/useMediaQuery.js';
 import { useLock } from '../hooks/useLock.js';
 import { APP_NAME } from '../config/legal.js';
 import { db } from '../db/schema.js';
@@ -42,8 +49,13 @@ export default function DiaryShell() {
   const [draftKey, setDraftKey] = useState(() => `draft-${Date.now()}`);
   const [searchOpen, setSearchOpen] = useState(false);
   const [jumpToIndex, setJumpToIndex] = useState(null);
-  const [panel, setPanel] = useState(null); // 'help' | 'stats' | 'settings' | 'admin' | 'sync' | 'legal' | null
+  const [panel, setPanel] = useState(null); // 'help' | 'stats' | 'settings' | 'admin' | 'sync' | 'legal' | 'ambient' | 'mesh' | 'contents' | 'security' | null
   const lockNow = useLock();
+  const unlockedAt = useRef(Date.now());
+  const [pageIndex, setPageIndex] = useState(0);
+  const wide = useMediaQuery('(min-width: 720px) and (min-height: 501px)');
+  const desktop = useMediaQuery('(min-width: 1024px) and (min-height: 641px)');
+  useEffect(() => stopAmbient, []); // silence when the diary locks/unmounts
   const openHelp = useCallback(() => setPanel('help'), []);
   const closePanel = useCallback(() => setPanel(null), []);
 
@@ -75,10 +87,20 @@ export default function DiaryShell() {
     if (index >= 0) setJumpToIndex(index);
   }
 
+  const currentEntryId = (entries ?? [])[pageIndex]?.id ?? null;
+
   const menuItems = [
+    ...(wide
+      ? []
+      : [
+          { key: 'contents', label: 'Contents', onSelect: () => setPanel('contents') },
+          { key: 'security', label: 'Security', onSelect: () => setPanel('security') },
+        ]),
     { key: 'stats', label: 'Stats & streak', onSelect: () => setPanel('stats') },
-    { key: 'help', label: 'Help / Getting started', onSelect: () => setPanel('help') },
+    { key: 'mesh', label: 'Connections', onSelect: () => setPanel('mesh') },
+    { key: 'ambient', label: 'Ambient sounds', onSelect: () => setPanel('ambient') },
     { key: 'settings', label: 'Settings', onSelect: () => setPanel('settings') },
+    { key: 'help', label: 'Help / Getting started', onSelect: () => setPanel('help') },
     { key: 'admin', label: 'Admin (backup, trash, health)', onSelect: () => setPanel('admin') },
     { key: 'sync', label: 'Sync', onSelect: () => setPanel('sync') },
     { key: 'legal', label: 'Legal & About', onSelect: () => setPanel('legal') },
@@ -89,7 +111,7 @@ export default function DiaryShell() {
     <div className={styles.app}>
       <header className={styles.appBar}>
         <div className={styles.brand}>
-          <span className={styles.brandMark} aria-hidden="true" />
+          <img className={styles.brandMark} src="/brand-mark.png" alt="" width="28" height="30" draggable="false" />
           <span className={styles.brandName}>{APP_NAME}</span>
         </div>
 
@@ -102,27 +124,26 @@ export default function DiaryShell() {
             <SearchIcon />
             <span className={styles.label}>Search</span>
           </button>
-          <button type="button" className={`${styles.pill} ${styles.desktopOnly}`} onClick={() => setPanel('stats')}>
-            Stats
-          </button>
-          <button type="button" className={`${styles.pill} ${styles.desktopOnly}`} onClick={() => setPanel('help')}>
-            Help
-          </button>
-          <button type="button" className={`${styles.pill} ${styles.desktopOnly}`} onClick={() => setPanel('settings')}>
-            Settings
-          </button>
+          {wide && (
+            <button type="button" className={styles.pill} onClick={() => setPanel('contents')} aria-label="Contents">
+              <ListIcon />
+              <span className={styles.label}>Contents</span>
+            </button>
+          )}
+          {wide && (
+            <button type="button" className={styles.pill} onClick={() => setPanel('security')} aria-label="Security">
+              <ShieldIcon />
+              <span className={styles.label}>Security</span>
+            </button>
+          )}
           <button type="button" className={styles.pill} onClick={lockNow} aria-label="Lock">
             <LockIcon />
             <span className={styles.label}>Lock</span>
           </button>
-          <div className={styles.desktopOnly}>
-            <ThemeSwitcher />
-          </div>
-          <div className={styles.mobileOnly}>
-            <OverflowMenu items={menuItems} buttonClassName={styles.pill}>
-              <ThemeSwitcher variant="menu" />
-            </OverflowMenu>
-          </div>
+          {desktop && <ThemeSwitcher />}
+          <OverflowMenu items={menuItems} buttonClassName={styles.pill}>
+            {desktop ? null : <ThemeSwitcher variant="menu" />}
+          </OverflowMenu>
         </nav>
       </header>
 
@@ -137,6 +158,8 @@ export default function DiaryShell() {
               fill
               jumpToIndex={jumpToIndex}
               onJumpComplete={() => setJumpToIndex(null)}
+              onIndexChange={setPageIndex}
+              onOpenContents={() => setPanel('contents')}
             />
           )}
         </LeatherCover>
@@ -157,9 +180,26 @@ export default function DiaryShell() {
         />
       )}
       {panel === 'admin' && <AdminDashboard onClose={closePanel} />}
+      {panel === 'contents' && (
+        <ContentsPanel onClose={closePanel} onOpenEntry={handleSelectSearchResult} currentEntryId={currentEntryId} />
+      )}
+      {panel === 'security' && (
+        <SecurityPanel
+          onClose={closePanel}
+          unlockedAt={unlockedAt.current}
+          onLockNow={() => {
+            setPanel(null);
+            lockNow();
+          }}
+          onOpenSettings={() => setPanel('settings')}
+        />
+      )}
+      {panel === 'mesh' && <MeshPanel onClose={closePanel} onOpenEntry={handleSelectSearchResult} />}
+      {panel === 'ambient' && <AmbientPanel onClose={closePanel} />}
       {panel === 'sync' && <SyncPanel onClose={closePanel} />}
       {panel === 'legal' && <LegalModal onClose={closePanel} />}
       </Suspense>
+      <PrivacyShield />
       {searchOpen && (
         <SearchPanel onSelectEntry={handleSelectSearchResult} onClose={() => setSearchOpen(false)} />
       )}

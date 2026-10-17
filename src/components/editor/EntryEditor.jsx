@@ -10,6 +10,8 @@ import { buildTemplate } from '../../features/templates.js';
 import { enqueueSync } from '../../features/syncQueue.js';
 import { softDeleteEntry } from '../../features/trash.js';
 import { downloadBytes } from '../../features/download.js';
+import { yDocToMarkdown, entryToMarkdown } from '../../features/markdown.js';
+import { isSealed, parseSealDate, minSealDate, isValidSealTarget, describeRemaining } from '../../features/capsule.js';
 import { countWords, readingMinutes } from '../../features/textStats.js';
 import { FLUSH_BEFORE_LOCK_EVENT } from '../../features/autoLock.js';
 import { encryptData, decryptData, encryptBinary, decryptBinary } from '../../utils/crypto.js';
@@ -47,6 +49,12 @@ export default function EntryEditor({ entryId, onEntryCreated, onOpenHelp }) {
   const [overlay, setOverlay] = useState(null); // 'drawing' | 'voice' | 'sinhala' | 'history' | null
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [welcomeHidden, setWelcomeHidden] = useState(false);
+  const [sealUntil, setSealUntil] = useState(null); // time capsule (stored in the encrypted title payload)
+  const sealRef = useRef(null);
+  sealRef.current = sealUntil;
+  const [sealPicker, setSealPicker] = useState(false);
+  const [sealDate, setSealDate] = useState('');
+  const sealed = isSealed(sealUntil);
 
   // Load + decrypt an existing entry on mount, or start a fresh Y.Doc.
   useEffect(() => {
@@ -70,6 +78,7 @@ export default function EntryEditor({ entryId, onEntryCreated, onOpenHelp }) {
           const contentBytes = await decryptBinary(record.contentPayload, cryptoKey);
           if (cancelled) return;
           setTitle(titleData.title || '');
+          setSealUntil(typeof titleData.sealUntil === 'number' ? titleData.sealUntil : null);
           setYdoc(decodeYDoc(new Uint8Array(contentBytes)));
         } else if (record.payload) {
           // Pre-Phase-4 format: one JSON snapshot, no Yjs history at all.
@@ -120,7 +129,7 @@ export default function EntryEditor({ entryId, onEntryCreated, onOpenHelp }) {
       if (!cryptoKey || !ydoc || loadFailedRef.current) return null;
       setSaving(true);
       try {
-        const titlePayload = await encryptData({ title: nextTitle }, cryptoKey);
+        const titlePayload = await encryptData({ title: nextTitle, sealUntil: sealRef.current ?? null }, cryptoKey);
         const contentPayload = await encryptBinary(encodeYDoc(ydoc), cryptoKey);
         const now = Date.now();
         const wasNew = currentEntryIdRef.current == null;
@@ -235,11 +244,27 @@ export default function EntryEditor({ entryId, onEntryCreated, onOpenHelp }) {
     await softDeleteEntry(db, currentEntryIdRef.current);
   }
 
+  async function handleSeal() {
+    const target = parseSealDate(sealDate);
+    if (!isValidSealTarget(target)) return;
+    sealRef.current = target; // saveEntry reads the ref, so the date is in the very next save
+    setSealUntil(target);
+    setSealPicker(false);
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    await saveEntry(titleRef.current);
+  }
+
+  async function handleOpenEarly() {
+    sealRef.current = null;
+    setSealUntil(null);
+    await saveEntry(titleRef.current);
+  }
+
   function handleExportText() {
     const header = title.trim() || 'Untitled entry';
-    const text = `${header}\n${'='.repeat(header.length)}\n\n${plainText}\n`;
+    const md = entryToMarkdown({ title: header, bodyMarkdown: ydoc ? yDocToMarkdown(ydoc) : plainText, createdAt: Date.now() });
     const safe = header.replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '').slice(0, 40) || 'entry';
-    downloadBytes(new TextEncoder().encode(text), `${safe}.txt`, 'text/plain');
+    downloadBytes(new TextEncoder().encode(md), `${safe}.md`, 'text/markdown');
   }
 
   async function handleDrawingSave(strokes) {
@@ -324,7 +349,20 @@ export default function EntryEditor({ entryId, onEntryCreated, onOpenHelp }) {
         </p>
       )}
 
-      <RichTextEditor
+      {sealed && (
+        <div className={styles.sealed} role="status">
+          <p className={styles.sealedTitle}>Sealed until {new Date(sealUntil).toLocaleDateString()}</p>
+          <p className={styles.sealedText}>
+            This page is a time capsule - it {describeRemaining(sealUntil)}. Until then its words stay hidden,
+            even from search.
+          </p>
+          <button type="button" className={styles.historyLink} onClick={handleOpenEarly}>
+            Open early
+          </button>
+        </div>
+      )}
+
+      {!sealed && <RichTextEditor
         ydoc={ydoc}
         onChange={() => setChangeTick((t) => t + 1)}
         editorRef={editorRef}
@@ -338,7 +376,28 @@ export default function EntryEditor({ entryId, onEntryCreated, onOpenHelp }) {
                   />
                 ) : null
         }
-      />
+      />}
+
+      {sealPicker && !sealed && (
+        <div className={styles.sealRow}>
+          <label htmlFor="seal-date">Seal until</label>
+          <input
+            id="seal-date"
+            type="date"
+            className={styles.sealDate}
+            min={minSealDate()}
+            value={sealDate}
+            onChange={(e) => setSealDate(e.target.value)}
+          />
+          <button type="button" className={styles.historyLink} onClick={handleSeal} disabled={!isValidSealTarget(parseSealDate(sealDate))}>
+            Seal this page
+          </button>
+          <button type="button" className={styles.historyLink} onClick={() => setSealPicker(false)}>
+            Cancel
+          </button>
+          <span className={styles.sealNote}>You won&rsquo;t be able to read or edit it until then (you can still open early).</span>
+        </div>
+      )}
 
       <div className={styles.status}>
         <span className={styles.actions}>
@@ -346,13 +405,27 @@ export default function EntryEditor({ entryId, onEntryCreated, onOpenHelp }) {
             type="button"
             className={styles.historyLink}
             onClick={() => setOverlay('history')}
-            disabled={currentEntryIdRef.current == null}
+            disabled={currentEntryIdRef.current == null || sealed}
           >
             History
           </button>
-          <button type="button" className={styles.historyLink} onClick={handleExportText} disabled={wordCount === 0}>
+          <button type="button" className={styles.historyLink} onClick={handleExportText} disabled={wordCount === 0 || sealed}>
             Export
           </button>
+          {!sealed && (
+            <button
+              type="button"
+              className={styles.historyLink}
+              onClick={() => {
+                setSealDate(minSealDate());
+                setSealPicker((v) => !v);
+              }}
+              disabled={wordCount === 0}
+              aria-expanded={sealPicker}
+            >
+              Seal
+            </button>
+          )}
           {confirmDelete ? (
             <span className={styles.confirm}>
               Move to trash?{' '}

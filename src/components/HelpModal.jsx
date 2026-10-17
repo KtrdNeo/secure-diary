@@ -33,6 +33,7 @@ export default function HelpModal({ onClose }) {
           <li>Your passphrase is never stored. <b>If you forget it, nobody can recover your entries.</b></li>
           <li><b>Lock</b> hides the diary immediately. Auto-lock after inactivity is in Settings.</li>
           <li>Download a backup from Admin now and then.</li>
+          <li><b>Seal</b> an entry to hide it until a date. <b>Sounds</b> plays gentle focus audio. <b>Connections</b> maps related entries.</li>
         </ul>
       </div>
     </Modal>

@@ -1,0 +1,24 @@
+.shield {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: radial-gradient(ellipse at 50% 30%, var(--cover-highlight), var(--cover-base) 70%, var(--cover-shadow));
+  color: #fff;
+  font-family: var(--font-ui);
+  text-align: center;
+}
+
+.shield p {
+  margin: 6px 0 0;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+}
+
+.shield small {
+  opacity: 0.75;
+}

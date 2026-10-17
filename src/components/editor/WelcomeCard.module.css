@@ -1,6 +1,6 @@
 .card {
   flex: none;
-  margin: 6px clamp(10px, 3vw, 28px) 0;
+  margin: 6px var(--px, clamp(10px, 3vw, 28px)) 0;
   padding: 8px 12px;
   border-radius: 10px;
   border: 1px dashed color-mix(in srgb, var(--ink-secondary) 45%, transparent);
