@@ -15,6 +15,14 @@ export default function UpdatePrompt() {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
   } = useRegisterSW({
+    // Look for a new version hourly (and when the app returns to the foreground).
+    onRegisteredSW: (_url, registration) => {
+      if (!registration) return;
+      setInterval(() => registration.update().catch(() => {}), 60 * 60 * 1000);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') registration.update().catch(() => {});
+      });
+    },
     onRegisterError: (error) => {
       // eslint-disable-next-line no-console
       console.error('Service worker registration failed:', error);
