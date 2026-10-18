@@ -11,6 +11,7 @@ import '@fontsource/source-serif-4/400.css';
 import '@fontsource/source-serif-4/600.css';
 import '@fontsource-variable/work-sans';
 
+import './pwa/installPrompt.js'; // catches beforeinstallprompt before React mounts
 import './index.css';
 import './theme/themes.css';
 

@@ -24,7 +24,7 @@ export default function HelpModal({ onClose }) {
         <ul>
           <li><b>Search</b> looks through all entries (decrypted in memory only, never stored).</li>
           <li><b>History</b> under an entry restores older versions.</li>
-          <li><b>Delete</b> moves an entry to the trash; restore it from Admin &rarr; Trash.</li>
+          <li><b>Delete</b> (the bin beside the title, the header, or More) moves a page to the Trash; tap <b>Undo</b> right away or use <b>Trash</b> (More menu or footer) to restore or erase pages.</li>
           <li><b>Stats</b> shows your writing streak. <b>Export</b> saves one entry as text; Admin has full backup and PDF.</li>
         </ul>
 

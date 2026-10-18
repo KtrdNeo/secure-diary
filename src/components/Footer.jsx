@@ -14,6 +14,9 @@ export default function Footer({ onOpenPanel }) {
         <button type="button" className={styles.legalButton} onClick={() => onOpenPanel('help')}>
           Help
         </button>
+        <button type="button" className={styles.legalButton} onClick={() => onOpenPanel('trash')}>
+          Trash
+        </button>
         <button type="button" className={styles.legalButton} onClick={() => onOpenPanel('admin')}>
           Admin
         </button>

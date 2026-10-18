@@ -58,6 +58,37 @@
   text-overflow: ellipsis;
 }
 
+.offline {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink-primary) 10%, transparent);
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.offlineDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #d98a00;
+}
+
+@media (max-width: 440px) {
+  .offlineText {
+    display: none;
+  }
+  .offline {
+    padding: 0 7px;
+  }
+}
+
 .actions {
   display: flex;
   align-items: center;
@@ -83,6 +114,64 @@
   cursor: pointer;
   box-shadow: 0 5px 14px rgba(0, 0, 0, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.12);
   transition: filter 0.15s ease, transform 0.1s ease;
+}
+
+.pillDanger {
+  background: color-mix(in srgb, #b3261e 72%, var(--cover-base) 28%);
+}
+.pill:disabled {
+  opacity: 0.45;
+  cursor: default;
+  filter: none;
+}
+
+.toast {
+  position: fixed;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: max-content;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 56px);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: calc(100vw - 24px);
+  padding: 6px 8px 6px 16px;
+  border-radius: 999px;
+  background: #241a12;
+  color: #fff;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+}
+.toastButton {
+  min-height: 44px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: #f0c978;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.toastButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.toastButton:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+@media (max-width: 420px) {
+  .toast {
+    border-radius: 18px;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 8px 12px;
+  }
 }
 
 .pill:hover {

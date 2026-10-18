@@ -5,6 +5,7 @@ import { useSync } from '../sync/SyncProvider.jsx';
 import { isSupabaseConfigured } from '../sync/supabaseClient.js';
 import { AUTO_LOCK_SETTING_KEY, DEFAULT_AUTO_LOCK_MINUTES, SETTINGS_CHANGED_EVENT } from '../features/autoLock.js';
 import { SHIELD_SETTING_KEY, resolveShield } from '../features/privacy.js';
+import { formatBytes, getStorageStatus, requestPersistence } from '../pwa/storage.js';
 import { ShieldIcon } from './icons.jsx';
 import styles from './panels.module.css';
 
@@ -26,6 +27,7 @@ export default function SecurityPanel({ onClose, onLockNow, onOpenSettings, unlo
   const [minutes, setMinutes] = useState(DEFAULT_AUTO_LOCK_MINUTES);
   const [shield, setShield] = useState(false);
   const [counts, setCounts] = useState(null);
+  const [storage, setStorage] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -44,6 +46,15 @@ export default function SecurityPanel({ onClose, onLockNow, onOpenSettings, unlo
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    getStorageStatus().then(setStorage);
+  }, []);
+
+  async function protectStorage() {
+    await requestPersistence();
+    setStorage(await getStorageStatus());
+  }
 
   async function toggleShield(e) {
     setShield(e.target.checked);
@@ -75,6 +86,19 @@ export default function SecurityPanel({ onClose, onLockNow, onOpenSettings, unlo
             Change
           </button>
         </Row>
+        {storage?.supported && (
+          <Row ok={storage.persisted} title={storage.persisted ? 'Protected from automatic cleanup' : 'Not protected from cleanup'}>
+            {storage.persisted
+              ? 'Your browser will not delete this diary when the device runs low on space.'
+              : 'The browser may clear this diary if the device runs low on space. Install the app or protect it now, and keep a backup.'}{' '}
+            {formatBytes(storage.usage)} used.{' '}
+            {!storage.persisted && (
+              <button type="button" className={styles.linkBtn} onClick={protectStorage}>
+                Protect
+              </button>
+            )}
+          </Row>
+        )}
         {unlockedAt && (
           <Row title="This session">Unlocked at {new Date(unlockedAt).toLocaleTimeString()}.</Row>
         )}

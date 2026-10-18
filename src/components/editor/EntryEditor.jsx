@@ -8,7 +8,7 @@ const SinhalaInputPanel = lazy(() => import('../SinhalaInputPanel.jsx'));
 import WelcomeCard from './WelcomeCard.jsx';
 import { buildTemplate } from '../../features/templates.js';
 import { enqueueSync } from '../../features/syncQueue.js';
-import { softDeleteEntry } from '../../features/trash.js';
+import { TrashIcon } from '../icons.jsx';
 import { downloadBytes } from '../../features/download.js';
 import { yDocToMarkdown, entryToMarkdown } from '../../features/markdown.js';
 import { isSealed, parseSealDate, minSealDate, isValidSealTarget, describeRemaining } from '../../features/capsule.js';
@@ -30,7 +30,7 @@ const SNAPSHOT_MIN_INTERVAL_MS = 5 * 60 * 1000; // don't version-history-spam on
  * mid-lifecycle entry switches internally. DiaryShell is responsible for
  * that key.
  */
-export default function EntryEditor({ entryId, onEntryCreated, onOpenHelp }) {
+export default function EntryEditor({ entryId, onEntryCreated, onOpenHelp, prefill = null, onPrefillUsed, onRequestDelete }) {
   const { cryptoKey } = useSessionKey();
   const editorRef = useRef(null);
   const saveTimerRef = useRef(null);
@@ -47,7 +47,6 @@ export default function EntryEditor({ entryId, onEntryCreated, onOpenHelp }) {
   const [savedAt, setSavedAt] = useState(null);
   const [saving, setSaving] = useState(false);
   const [overlay, setOverlay] = useState(null); // 'drawing' | 'voice' | 'sinhala' | 'history' | null
-  const [confirmDelete, setConfirmDelete] = useState(false);
   const [welcomeHidden, setWelcomeHidden] = useState(false);
   const [sealUntil, setSealUntil] = useState(null); // time capsule (stored in the encrypted title payload)
   const sealRef = useRef(null);
@@ -219,6 +218,29 @@ export default function EntryEditor({ entryId, onEntryCreated, onOpenHelp }) {
   const wordCount = countWords(plainText);
   const isBlankPage = plainText.length === 0 && !title.trim();
 
+  // Content handed over by the Web Share Target (draft page only): applied once the editor exists.
+  const prefillDoneRef = useRef(false);
+  useEffect(() => {
+    if (!prefill || prefillDoneRef.current || !loaded || loadFailedRef.current) return undefined;
+    let tries = 0;
+    const timer = setInterval(() => {
+      tries += 1;
+      const ed = editorRef.current;
+      if (ed) {
+        prefillDoneRef.current = true;
+        clearInterval(timer);
+        if (prefill.title) setTitle(prefill.title);
+        ed.chain().focus().insertContent(prefill.content).run();
+        setWelcomeHidden(true);
+        onPrefillUsed?.();
+      } else if (tries > 40) {
+        clearInterval(timer);
+      }
+    }, 100);
+    return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefill, loaded]);
+
   function handlePickTemplate(id) {
     const built = buildTemplate(id);
     if (!built) return;
@@ -237,11 +259,10 @@ export default function EntryEditor({ entryId, onEntryCreated, onOpenHelp }) {
       .run();
   }
 
-  async function handleDelete() {
-    setConfirmDelete(false);
+  function handleRequestDelete() {
     if (currentEntryIdRef.current == null) return;
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-    await softDeleteEntry(db, currentEntryIdRef.current);
+    onRequestDelete?.(currentEntryIdRef.current);
   }
 
   async function handleSeal() {
@@ -328,12 +349,24 @@ export default function EntryEditor({ entryId, onEntryCreated, onOpenHelp }) {
 
   return (
     <div className={styles.editor}>
-      <input
-        className={styles.titleInput}
-        placeholder="Untitled entry"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
+      <div className={styles.titleRow}>
+        <input
+          className={styles.titleInput}
+          placeholder="Untitled entry"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <button
+          type="button"
+          className={styles.trashButton}
+          onClick={handleRequestDelete}
+          disabled={currentEntryIdRef.current == null}
+          aria-label="Delete this page"
+          title="Delete this page (moves it to the trash)"
+        >
+          <TrashIcon />
+        </button>
+      </div>
 
       {loadFailed && (
         <p className={styles.migrationNotice}>
@@ -426,26 +459,14 @@ export default function EntryEditor({ entryId, onEntryCreated, onOpenHelp }) {
               Seal
             </button>
           )}
-          {confirmDelete ? (
-            <span className={styles.confirm}>
-              Move to trash?{' '}
-              <button type="button" className={styles.dangerLink} onClick={handleDelete}>
-                Yes
-              </button>
-              <button type="button" className={styles.historyLink} onClick={() => setConfirmDelete(false)}>
-                Cancel
-              </button>
-            </span>
-          ) : (
-            <button
-              type="button"
-              className={styles.historyLink}
-              onClick={() => setConfirmDelete(true)}
-              disabled={currentEntryIdRef.current == null}
-            >
-              Delete
-            </button>
-          )}
+          <button
+            type="button"
+            className={styles.dangerLink}
+            onClick={handleRequestDelete}
+            disabled={currentEntryIdRef.current == null}
+          >
+            Delete
+          </button>
         </span>
         <span className={styles.meta}>
           {wordCount > 0 && (

@@ -1,0 +1,68 @@
+.banner {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 clamp(10px, 3vw, 24px) 6px;
+  padding: 2px 4px 2px 14px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--paper-base) 88%, var(--metal-base) 12%);
+  color: var(--ink-primary);
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+.text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.install {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 999px;
+  background: var(--cover-base);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.install:focus-visible,
+.dismiss:focus-visible {
+  outline: 2px solid var(--metal-base);
+  outline-offset: 2px;
+}
+.dismiss {
+  flex: none;
+  min-width: 44px;
+  min-height: 44px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-secondary);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.dismiss:hover {
+  background: color-mix(in srgb, var(--ink-primary) 10%, transparent);
+}
+/* Short landscape phones: the diary needs every pixel - the More menu still has Install. */
+@media (max-height: 500px) {
+  .banner {
+    display: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .more {
+    display: none;
+  }
+}
