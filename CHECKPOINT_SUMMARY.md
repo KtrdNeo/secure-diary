@@ -373,3 +373,27 @@ Feedback: binder rings looked stretched (ovals), UI not responsive/refined enoug
 - Verified: 176 unit tests; audit 0 issues on 9 devices incl. Contents/Security; sweep 750/750; axe 0 violations (incl. Settings/Ambient/Connections); `browser-features.py` now also checks ring roundness at 4 sizes, Contents, Security and the shield; stealth + smoke flows pass.
 
 **App icon (2026-10-18):** the leather-diary-with-lock artwork replaces the old icon. Source: `assets-src/diary-icon-source.jpg`; `python3 scripts/make-icons.py` regenerates `icon-192/512`, `icon-maskable-192/512` (on a warm paper tone, inside the 66% safe zone), `apple-touch-icon`, `favicon-32` and `brand-mark.png` (used in the app bar and unlock screen). Check you hold the rights to the artwork you use.
+
+## Milestone — Full PWA support (2026-10-18)
+- Installable: complete manifest (id, scope, lang, categories, display_override, maskable + any icons, 3 shortcuts `?action=new|search|contents`, Web Share Target GET `/`, wide+narrow screenshots). CDP installability errors: none.
+- Offline: workbox precache (84 entries), navigateFallback, cleanupOutdatedCaches; app unlocks and saves entries with no network; offline chip in header (`useOnline`).
+- Update UX: `registerType:'prompt'` + hourly/visibility `registration.update()`; in-app update prompt.
+- Install UX: `src/pwa/installPrompt.js` (beforeinstallprompt capture), menu "Install app" (Chromium) / "Add to Home Screen" steps (iOS, `InstallHelp`).
+- Launch handling: `src/pwa/launch.js` — shortcuts + shared text/url become a plain-text prefilled entry (no markup injection); URL cleaned afterwards.
+- Storage: `navigator.storage.persist()` requested at start; Security panel shows protection status, usage, "Protect" button.
+- Hosting: `vercel.json` headers (sw.js no-cache, manifest, immutable assets, nosniff, referrer, frame, permissions).
+- Verification: `scripts/pwa-check.py` (19 checks pass), npm test 180/180, responsive-audit 0, axe 0, sweep 750/750, smoke/features/stealth pass.
+- Known limits: iOS has no install-prompt API (manual Add to Home Screen); shortcuts/share target need the installed app on Android/desktop Chromium; no Apple splash screens; no file_handlers/background sync; real-device install untested.
+
+## Milestone — Easy delete & Trash (2026-10-18)
+- Delete is reachable everywhere: bin icon beside the page title (always visible), red bin pill in the header (wide screens), "Delete this page" in More (phones), footer/More "Trash".
+- Flow: confirm dialog ("Move this page to trash?") → soft delete → 8s toast with **Undo** (restores + jumps back to the page) and **View trash**.
+- New `TrashPanel`: decrypted titles, per-page Restore / Delete forever (inline confirm), Restore all, Empty trash. Admin → Trash tab still works.
+- `features/trash.js`: `restoreEntry`, `listDeleted`, `purgeEntries` (never touches live entries); 2 new unit tests (182 total).
+- Verified: `scripts/browser-delete.py` (desktop/phone/320px), responsive audit 0, sweep 750/750, axe 0 (incl. confirm, toast, trash), smoke/features/stealth/pwa pass.
+
+## Milestone — iOS install button (2026-10-18)
+- iOS has no install-prompt API, so "Install" is a guided flow: slim dismissible **banner** under the app bar (14-day snooze), **Install** pill in the header (wide screens), **Install app** in More (phones). Hidden once installed/standalone.
+- `InstallHelp` is browser-aware (`detectIOSBrowser`, `detectIPad`): Safari (share button location), Chrome/Firefox/Edge (needs iOS 16.4+), iPad (share at top), in-app browsers (Instagram/Facebook etc. → "Open in Safari" + Copy link). Android/desktop Chromium still use the native prompt via the same button.
+- Verified: `scripts/browser-ios.py` (50 checks: iPhone Safari/320px/Chrome/in-app/iPad/installed/desktop prompt), audit 0, sweep 750/750, axe 0, all other suites pass, unit tests 183.
+- Limit: Safari cannot be made to install silently — user still taps Share → Add to Home Screen; real-iPhone test pending.

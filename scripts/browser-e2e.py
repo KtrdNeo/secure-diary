@@ -80,7 +80,7 @@ with sync_playwright() as p:
     check('restored entry decrypts on new device', B.input_value('input[placeholder="Untitled entry"]') == 'Alpha')
 
     # --- delete + delete forever ---
-    B.click('button:has-text("Delete")'); B.click('button:has-text("Yes")'); time.sleep(1.5)
+    B.click('button[aria-label="Delete this page"] >> visible=true'); B.click('[role=dialog] button:has-text("Move to trash")'); time.sleep(1.5)
     B.click('footer button:has-text("Admin")'); B.click('[role=dialog] button:has-text("Trash")'); time.sleep(.5)
     check('trash shows 1 entry', B.locator('text=/1 entry in the trash/').count() == 1)
     B.click('button:has-text("Delete forever")'); B.click('button:has-text("Yes, delete forever")'); time.sleep(.8)

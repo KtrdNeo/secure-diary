@@ -25,6 +25,13 @@ with sync_playwright() as p:
         for i in range(ins.count()): ins.nth(i).fill(PW)
         pg.keyboard.press('Enter'); pg.wait_for_selector('.ProseMirror'); time.sleep(1)
         total += run(pg, f'editor ({theme})')
+        pg.fill('input[placeholder="Untitled entry"]', 'Axe page'); pg.click('.ProseMirror'); pg.keyboard.type('some words'); time.sleep(2.5)
+        pg.get_by_role('button', name='Delete this page').first.click(); time.sleep(.5)
+        total += run(pg, f'Delete confirm ({theme})')
+        pg.get_by_role('dialog').get_by_role('button', name='Move to trash').click(); time.sleep(.8)
+        total += run(pg, f'Undo toast ({theme})')
+        pg.get_by_role('button', name='View trash').click(); time.sleep(.8)
+        total += run(pg, f'Trash with entry ({theme})'); pg.keyboard.press('Escape'); time.sleep(.3)
         for name in ('Search', 'More'):
             try:
                 pg.get_by_role('button', name=name).first.click(); time.sleep(.5)

@@ -76,6 +76,7 @@ with sync_playwright() as p:
             pg.click('button[aria-label="Table"]'); time.sleep(.3)
             pg.screenshot(path=f'{OUT}/{dev}-4-table.png'); report(f'{dev}/table', pg, bucket)
         except Exception as e: bucket.append(f'[{dev}] table click failed: {str(e)[:80]}')
+        time.sleep(2.5)  # let autosave give the page a real id so Delete is enabled
         more = pg.locator('button[aria-label="More"]').count() > 0 and pg.locator('button[aria-label="More"]').is_visible()
         def go(label, tag, via_more=None, scope=None):
             try:
@@ -93,7 +94,7 @@ with sync_playwright() as p:
             except Exception as e:
                 bucket.append(f'[{dev}/{tag}] FAILED {str(e)[:100]}')
                 pg.keyboard.press('Escape'); time.sleep(.3)
-        for label, tag in [('Stats','stats'),('Help','help'),('Settings','settings'),('Admin','admin'),('Sync','sync'),('Legal','legal'),('Sounds','sounds'),('Connections','mesh'),('Contents','contents'),('Security','security'),('Search','search')]:
+        for label, tag in [('Stats','stats'),('Help','help'),('Settings','settings'),('Admin','admin'),('Sync','sync'),('Legal','legal'),('Sounds','sounds'),('Connections','mesh'),('Contents','contents'),('Security','security'),('Trash','trash'),('Delete this page','delete'),('Search','search')]:
             go(label, tag)
         try:
             pg.click('button[aria-label="Sinhala input"]'); time.sleep(.5)

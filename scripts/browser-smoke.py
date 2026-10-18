@@ -25,7 +25,7 @@ with sync_playwright() as p:
     pg.wait_for_selector('button[aria-label="Lock"]',timeout=40000); time.sleep(2)
     print('title:',pg.input_value('input[placeholder="Untitled entry"]'))
     # delete
-    pg.click('button:has-text("Delete")'); pg.click('button:has-text("Yes")'); time.sleep(2)
+    pg.click('button[aria-label="Delete this page"] >> visible=true'); pg.click('[role=dialog] button:has-text("Move to trash")'); time.sleep(2)
     print('indicator after delete:',pg.locator('text=/Page \\d+ of \\d+/').first.inner_text(), '| welcome:',pg.locator('text=A blank page').count())
     pg.click('footer button:has-text("Admin")'); pg.click('[role=dialog] button:has-text("Trash")'); time.sleep(.6)
     print(pg.locator('[role=dialog]').inner_text().replace('\n',' | ')[:260])

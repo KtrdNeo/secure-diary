@@ -155,3 +155,6 @@ All encryption happens client-side before anything is written to Dexie or
 a plaintext note, an encryption key, or the user's passphrase - only
 ciphertext. See the header comment in `src/utils/crypto.js` for the exact
 algorithm choices and parameters.
+
+### PWA verification
+`npx vite build && npx vite preview --port 4180` then `python3 scripts/pwa-check.py` (manifest, installability, service worker, offline, shortcuts, share target). To pick up a new manifest on an installed app, uninstall and reinstall it.
