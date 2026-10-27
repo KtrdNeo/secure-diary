@@ -82,8 +82,10 @@
 
 .actions {
   display: flex;
+  flex-wrap: wrap; /* huge text: wrap to a second row instead of clipping Seal/Delete */
   align-items: center;
   gap: 2px;
+  min-width: 0;
 }
 
 .meta {
@@ -289,5 +291,44 @@
     width: 40px;
     height: 40px;
     margin-bottom: 0;
+  }
+}
+
+/* Very short viewports (keyboard open, small landscape): one-line status row, slimmer title row. */
+@media (max-height: 380px), (max-width: 300px) {
+  .status {
+    flex-wrap: nowrap;
+    min-height: 28px;
+    gap: 0 8px;
+  }
+  .actions {
+    flex-wrap: nowrap;
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .actions::-webkit-scrollbar {
+    display: none;
+  }
+  .actions > * {
+    flex: none;
+    white-space: nowrap;
+  }
+  .readTime {
+    display: none;
+  }
+  .historyLink,
+  .dangerLink {
+    min-height: 28px;
+  }
+  .titleInput {
+    min-height: 30px;
+    padding-top: 2px;
+    font-size: 1rem;
+  }
+  .trashButton {
+    width: 34px;
+    height: 34px;
   }
 }

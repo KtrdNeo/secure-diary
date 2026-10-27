@@ -1,4 +1,5 @@
 .toolbar {
+  flex: none; /* never squeezed by the title/editor above and below, even at huge text sizes */
   display: flex;
   align-items: center;
   gap: 2px;
@@ -21,6 +22,7 @@
 }
 
 .button {
+  flex: none;
   min-width: 32px;
   height: 32px;
   padding: 0 7px;

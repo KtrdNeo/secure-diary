@@ -11,7 +11,7 @@
 
 .credit {
   margin: 0;
-  font-size: 0.72rem;
+  font-size: min(0.72rem, 13px);
   line-height: 1.35;
   text-align: center;
   text-wrap: balance;
@@ -27,7 +27,7 @@
 .legalButton {
   display: inline-flex;
   align-items: center;
-  min-height: 30px;
+  min-height: 34px;
   font-family: var(--font-ui);
   font-size: 0.75rem;
   background: none;
@@ -57,7 +57,7 @@
 
 @media (max-width: 380px) {
   .credit {
-    font-size: 0.66rem;
+    font-size: min(0.66rem, 12px);
   }
 }
 
@@ -68,7 +68,7 @@
     padding-bottom: calc(2px + env(safe-area-inset-bottom));
   }
   .credit {
-    font-size: 0.62rem;
+    font-size: min(0.62rem, 11px);
   }
 }
 

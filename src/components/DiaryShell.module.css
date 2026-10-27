@@ -165,6 +165,11 @@
   outline: 2px solid #fff;
   outline-offset: 1px;
 }
+@media (max-height: 500px) {
+  .toast {
+    bottom: calc(10px + env(safe-area-inset-bottom));
+  }
+}
 @media (max-width: 420px) {
   .toast {
     border-radius: 18px;
@@ -279,5 +284,20 @@
   .pill {
     min-height: 34px;
     min-width: 34px;
+  }
+}
+
+@media (max-height: 380px), (max-width: 300px) {
+  .appBar {
+    padding-top: 1px;
+    padding-bottom: 1px;
+  }
+  .pill {
+    min-height: 32px;
+    min-width: 32px;
+  }
+  .brandMark {
+    height: 24px;
+    width: auto;
   }
 }

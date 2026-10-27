@@ -134,3 +134,17 @@
     width: 40px;
   }
 }
+
+@media (max-height: 380px), (max-width: 300px) {
+  .pageNav {
+    min-height: 28px;
+    padding: 2px;
+  }
+  .navButton,
+  .pageIndicator,
+  .pageButton {
+    min-height: 28px;
+    height: 28px;
+    font-size: 0.72rem;
+  }
+}

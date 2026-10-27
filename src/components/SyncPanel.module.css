@@ -11,6 +11,7 @@
 }
 
 .panel {
+  overflow-wrap: anywhere; /* long words / paths never force sideways scroll */
   width: min(400px, 100%);
   background: var(--paper-base);
   color: var(--ink-primary);
@@ -169,4 +170,10 @@
     width: 40px;
     height: 40px;
   }
+}
+
+.panel code,
+.panel pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
