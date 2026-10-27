@@ -397,3 +397,9 @@ Feedback: binder rings looked stretched (ovals), UI not responsive/refined enoug
 - `InstallHelp` is browser-aware (`detectIOSBrowser`, `detectIPad`): Safari (share button location), Chrome/Firefox/Edge (needs iOS 16.4+), iPad (share at top), in-app browsers (Instagram/Facebook etc. → "Open in Safari" + Copy link). Android/desktop Chromium still use the native prompt via the same button.
 - Verified: `scripts/browser-ios.py` (50 checks: iPhone Safari/320px/Chrome/in-app/iPad/installed/desktop prompt), audit 0, sweep 750/750, axe 0, all other suites pass, unit tests 183.
 - Limit: Safari cannot be made to install silently — user still taps Share → Add to Home Screen; real-iPhone test pending.
+
+## Milestone — Extreme-responsive & accessibility refinement (2026-10-25)
+- New `scripts/stress.py`: 13 extreme viewports (240px, foldables, 300px-tall keyboard-open, 4K) × text 100/150/200% × light/dark + reduced-motion, hostile content (300-char title, 270-char unbroken word, 150-char URL, table); checks page/dialog overflow, off-screen header/page-bin, every dialog control reachable & uncovered, minimum writing area. Started with 17 problem scenarios → 0.
+- Fixes: dialogs never scroll sideways (`overflow-wrap:anywhere`, wrapping code/pre, stacked grids ≤340px); very short/narrow screens (≤380px tall or ≤300px wide) get a compact one-line status row, slimmer title/app bar/page nav → +20–60px writing room.
+- Accessibility: `prefers-reduced-motion` now also kills animations/transitions; `prefers-contrast: more` makes secondary text full-strength ink; Windows forced-colors gives every control a real edge + strong focus ring.
+- Verified: audit 0, sweep 750/750, axe 0, stress 0, delete/ios/pwa/features/stealth/smoke pass, unit tests 183.
