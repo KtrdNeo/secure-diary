@@ -62,6 +62,41 @@ video {
   *::before,
   *::after {
     scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* "Increase contrast": secondary text becomes full-strength ink. */
+@media (prefers-contrast: more) {
+  html:root[data-theme='light-leather'],
+  html:root[data-theme='dark-obsidian'],
+  html:root[data-theme='sepia-vintage'] {
+    --ink-secondary: var(--ink-primary);
+  }
+}
+
+/* Windows High Contrast / forced colors: shadows and fills vanish, so give controls real edges. */
+@media (forced-colors: active) {
+  button,
+  [role='button'],
+  select,
+  input:not([type='checkbox']):not([type='radio']),
+  textarea {
+    outline: 1px solid ButtonText;
+    outline-offset: -1px;
+  }
+  button:focus-visible,
+  [role='button']:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 3px solid Highlight;
+    outline-offset: 1px;
+  }
+  button:disabled {
+    outline-color: GrayText;
   }
 }
 

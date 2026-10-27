@@ -1,9 +1,12 @@
 .toast {
   position: fixed;
-  bottom: calc(16px + env(safe-area-inset-bottom));
+  /* sits just above the footer so the credit line is never covered */
+  bottom: calc(56px + env(safe-area-inset-bottom));
   max-width: calc(100vw - 24px);
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: max-content;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -21,7 +24,7 @@
   font-family: inherit;
   font-size: 0.78rem;
   font-weight: 600;
-  min-height: 36px;
+  min-height: 44px;
   padding: 0 16px;
   border-radius: 999px;
   border: none;
@@ -32,9 +35,9 @@
 
 .dismiss {
   flex: none;
-  width: 36px;
-  min-width: 36px;
-  height: 36px;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: none;
   background: rgba(255, 255, 255, 0.12);
@@ -42,4 +45,11 @@
   cursor: pointer;
   font-size: 0.95rem;
   line-height: 1;
+}
+
+/* Short landscape screens: the footer is hidden/tiny, so sit closer to the bottom edge. */
+@media (max-height: 500px) {
+  .toast {
+    bottom: calc(10px + env(safe-area-inset-bottom));
+  }
 }
